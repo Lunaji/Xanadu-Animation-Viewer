@@ -83,6 +83,8 @@ class AnimationViewer(QMainWindow):
         
         self.settings = QSettings('DualNatureStudios', 'AnimationViewer')
         self.recent_files = self.settings.value("recentFiles")
+        if not self.recent_files:
+            self.recent_files = []
 
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
