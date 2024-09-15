@@ -29,15 +29,15 @@ def decompose(vertices):
     positions = np.array([vertex[:3] for vertex in vertices])
     
     norm_scale = 100
-    normals = np.empty((positions.shape[0], 2, 3))
-    #interleave instead ?
-    normals[:, 0] = positions
-    normals[:, 1] = positions + norm_scale*np.array([
+    norm_ends = positions + norm_scale*np.array([
             [
                 convert_signed_5bit((vertex[3] >> x) & 0x1F)
                 for x in (0, 5, 10)
             ] for vertex in vertices
         ])
+    normals = np.empty((len(vertices)*2,3))
+    normals[0::2] = positions
+    normals[1::2] = norm_ends    
     
     return positions, normals
     
