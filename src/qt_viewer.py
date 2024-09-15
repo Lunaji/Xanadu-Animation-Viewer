@@ -25,7 +25,19 @@ def convert_signed_5bit(v):
     sign=-1 if (v%32)>15 else 1
     return sign*(v%16)
 
-def decompose(vertices):
+def decompose_regular(vertices):
+    positions = np.array([v.position for v in vertices])
+    
+    norm_scale = 100
+    norm_ends = positions + norm_scale*np.array([v.normal for v in vertices])
+    normals = np.empty((len(vertices)*2,3))
+    normals[0::2] = positions
+    normals[1::2] = norm_ends    
+    
+    return positions, normals
+    
+
+def decompose_animated(vertices):
     positions = np.array([vertex[:3] for vertex in vertices])
     
     norm_scale = 100
@@ -40,8 +52,6 @@ def decompose(vertices):
     normals[1::2] = norm_ends    
     
     return positions, normals
-    
-
 
 def find_node(node, name):
     if node.name == name:
@@ -70,8 +80,7 @@ class AnimationViewer(QMainWindow):
         
     def find_va_nodes(self, node):
         
-        if node.vertex_animation is not None:
-            self.va_nodes_list.addItem(node.name)
+        self.va_nodes_list.addItem(node.name)
             
         for child in node.children:
             self.find_va_nodes(child)
@@ -123,7 +132,7 @@ class AnimationViewer(QMainWindow):
         self.va_nodes_list = QListWidget(self)
         self.va_nodes_list.itemClicked.connect(self.on_node_clicked)
             
-        label = QLabel("Nodes with Vertex Animation", self)
+        label = QLabel("Nodes", self)
         
         scene_details_box = QGroupBox("Scene details", self)
         scene_details_layout = QVBoxLayout()
@@ -181,13 +190,14 @@ class AnimationViewer(QMainWindow):
                 break
             
         if r is not None:            
-            self.selected_node = r
-            
+            self.selected_node = r    
             self.cleanup_meshes()
-            
-            #Use non-animated mesh instead for init?
-            positions, normals = decompose(self.selected_node.vertex_animation.body[0])
-                
+
+            if self.selected_node.vertex_animation:
+                positions,normals = decompose_animated(self.selected_node.vertex_animation.body[0])
+            else:
+                positions,normals = decompose_regular(self.selected_node.vertices)
+        
             self.mesh = gl.GLMeshItem(
                 vertexes=positions,
                 faces=np.array([face.vertex_indices for face in self.selected_node.faces]),
@@ -208,7 +218,6 @@ class AnimationViewer(QMainWindow):
             self.node_details_widgets['VertexCount'].setText(f'Vertex #: {len(self.selected_node.vertices)}')
             self.node_details_widgets['FaceCount'].setText(f'Face #: {len(self.selected_node.faces)}')
             self.node_details_widgets['ChildCount'].setText(f'Child #: {len(self.selected_node.children)}')
-
 
     def openFile(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "XBF Files (*.xbf)")
@@ -258,18 +267,19 @@ class AnimationViewer(QMainWindow):
         
         if self.selected_node is not None:
             
-            self.current_frame = (self.current_frame + 1) % len(self.selected_node.vertex_animation.body)
-            
-            positions, normals = decompose(self.selected_node.vertex_animation.body[self.current_frame])
-            
-            if self.mesh is not None:            
-                self.mesh.setMeshData(
-                    vertexes=positions,
-                    faces=np.array([face.vertex_indices for face in self.selected_node.faces]),
-                )
+            if self.selected_node.vertex_animation is not None:
+                self.current_frame = (self.current_frame + 1) % len(self.selected_node.vertex_animation.body)
                 
-            if self.normal_arrows is not None:
-                self.normal_arrows.setData(pos=normals)
+                positions, normals = decompose_animated(self.selected_node.vertex_animation.body[self.current_frame])
+                
+                if self.mesh is not None:            
+                    self.mesh.setMeshData(
+                        vertexes=positions,
+                        faces=np.array([face.vertex_indices for face in self.selected_node.faces]),
+                    )
+                    
+                if self.normal_arrows is not None:
+                    self.normal_arrows.setData(pos=normals)
         
 
 if __name__ == '__main__':
