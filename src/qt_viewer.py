@@ -8,13 +8,14 @@ from PySide6.QtWidgets import (
     QWidget,
     QLabel,
     QListWidget,
+    QListWidgetItem,
     QMenuBar,
     QMenu,
     QFileDialog,
     QMessageBox,
     QGroupBox,
 )
-from PySide6.QtGui import QAction
+from PySide6.QtGui import QAction, QColor, QColorConstants
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from PySide6.QtCore import QTimer, QSettings, qDebug, QFileInfo
 import pyqtgraph.opengl as gl
@@ -80,7 +81,10 @@ class AnimationViewer(QMainWindow):
         
     def find_va_nodes(self, node):
         
-        self.va_nodes_list.addItem(node.name)
+        node_item = QListWidgetItem(node.name)
+        if node.vertex_animation:
+            node_item.setBackground(QColorConstants.Svg.lightgreen)
+        self.va_nodes_list.addItem(node_item)
             
         for child in node.children:
             self.find_va_nodes(child)
