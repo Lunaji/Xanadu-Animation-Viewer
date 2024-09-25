@@ -4,19 +4,11 @@ from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
     QVBoxLayout,
-    QHBoxLayout,
-    QWidget,
-    QLabel,
-    QListWidget,
     QListWidgetItem,
-    QMenuBar,
-    QMenu,
     QFileDialog,
     QMessageBox,
-    QGroupBox,
 )
-from PySide6.QtGui import QAction, QColor, QColorConstants
-from PySide6.QtOpenGLWidgets import QOpenGLWidget
+from PySide6.QtGui import QAction, QColorConstants
 from PySide6.QtCore import QTimer, QSettings, qDebug, QFileInfo
 import pyqtgraph.opengl as gl
 from ui_form import Ui_MainWindow
