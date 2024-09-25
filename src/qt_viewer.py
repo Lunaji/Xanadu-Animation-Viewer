@@ -118,7 +118,7 @@ class AnimationViewer(QMainWindow):
         self.ui.action_Open.triggered.connect(self.openFile)
         self.updateRecentFilesMenu()
 
-        self.ui.nodeList.itemClicked.connect(self.on_node_clicked)
+        self.ui.nodeList.itemSelectionChanged.connect(self.on_node_selected)
 
         label = QLabel("Nodes", self)
 
@@ -152,7 +152,9 @@ class AnimationViewer(QMainWindow):
             self.normal_arrows = None
 
 
-    def on_node_clicked(self, item):
+    def on_node_selected(self):
+        item = self.ui.nodeList.selectedItems()[0]
+
         for node in self.scene.nodes:
             r = find_node(node, item.text())
             if r is not None:
