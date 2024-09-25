@@ -123,16 +123,6 @@ class AnimationViewer(QMainWindow):
 
         label = QLabel("Nodes", self)
 
-        scene_details_box = QGroupBox("Scene details", self)
-        scene_details_layout = QVBoxLayout()
-        self.scene_details_widgets = {
-            'File': QLabel(f'File:'),
-            'Version': QLabel(f'Version:')
-        }
-        for widget in self.scene_details_widgets.values():
-            scene_details_layout.addWidget(widget)
-        scene_details_box.setLayout(scene_details_layout)
-
         node_details_box = QGroupBox("Node details", self)
         node_details_layout = QVBoxLayout()
         self.node_details_widgets = {
@@ -141,10 +131,8 @@ class AnimationViewer(QMainWindow):
         self.clear_node_details()
         for widget in self.node_details_widgets.values():
             node_details_layout.addWidget(widget)
-        scene_details_box.setLayout(scene_details_layout)
         node_details_box.setLayout(node_details_layout)
 
-        self.ui.sidebar.addWidget(scene_details_box)
         self.ui.sidebar.addWidget(label)
         self.ui.sidebar.addWidget(self.va_nodes_list)
         self.ui.sidebar.addWidget(node_details_box)
@@ -227,8 +215,8 @@ class AnimationViewer(QMainWindow):
         for node in self.scene.nodes:
             self.find_va_nodes(node)
 
-        self.scene_details_widgets['File'].setText(f'File: {QFileInfo(self.scene.file).fileName()}')
-        self.scene_details_widgets['Version'].setText(f'Version: {self.scene.version}')
+        self.ui.fileValue.setText(QFileInfo(self.scene.file).fileName())
+        self.ui.versionValue.setText(str(self.scene.version))
 
         if fileName in self.recent_files:
             self.recent_files.remove(fileName)
