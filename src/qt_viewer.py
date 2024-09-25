@@ -19,6 +19,7 @@ from PySide6.QtGui import QAction, QColor, QColorConstants
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from PySide6.QtCore import QTimer, QSettings, qDebug, QFileInfo
 import pyqtgraph.opengl as gl
+from ui_form import Ui_MainWindow
 from xanlib import load_xbf
 
 
@@ -72,6 +73,9 @@ class AnimationViewer(QMainWindow):
         self.current_frame = 0
         self.selected_node = None
 
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+
         self.initUI()
         
         #TODO: dict of meshes
@@ -91,7 +95,6 @@ class AnimationViewer(QMainWindow):
         
 
     def initUI(self):
-        self.setWindowTitle('Animation Viewer')
         self.setGeometry(100, 100, 1280, 720)
         
         self.settings = QSettings('DualNatureStudios', 'AnimationViewer')
