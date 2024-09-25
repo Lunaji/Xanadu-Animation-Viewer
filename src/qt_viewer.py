@@ -120,27 +120,12 @@ class AnimationViewer(QMainWindow):
 
         self.ui.nodeList.itemSelectionChanged.connect(self.on_node_selected)
 
-        label = QLabel("Nodes", self)
-
-        node_details_box = QGroupBox("Node details", self)
-        node_details_layout = QVBoxLayout()
-        self.node_details_widgets = {
-            attr: QLabel(self) for attr in ('Flags','VertexCount','FaceCount','ChildCount')
-        }
-        self.clear_node_details()
-        for widget in self.node_details_widgets.values():
-            node_details_layout.addWidget(widget)
-        node_details_box.setLayout(node_details_layout)
-
-        self.ui.sidebar.addWidget(label)
-        self.ui.sidebar.addWidget(node_details_box)
-
 
     def clear_node_details(self):
-        self.node_details_widgets['Flags'].setText(f'Flags:')
-        self.node_details_widgets['VertexCount'].setText(f'Vertex #:')
-        self.node_details_widgets['FaceCount'].setText(f'Face #:')
-        self.node_details_widgets['ChildCount'].setText(f'Child #:')
+        self.ui.nodeFlagsValue.setText('')
+        self.ui.vertexCountValue.setText('')
+        self.ui.faceCountValue.setText('')
+        self.ui.childCountValue.setText('')
 
 
     def cleanup_meshes(self):
@@ -185,10 +170,11 @@ class AnimationViewer(QMainWindow):
             )
             self.ui.viewer.view.addItem(self.normal_arrows)
 
-            self.node_details_widgets['Flags'].setText(f'Flags: {self.selected_node.flags}')
-            self.node_details_widgets['VertexCount'].setText(f'Vertex #: {len(self.selected_node.vertices)}')
-            self.node_details_widgets['FaceCount'].setText(f'Face #: {len(self.selected_node.faces)}')
-            self.node_details_widgets['ChildCount'].setText(f'Child #: {len(self.selected_node.children)}')
+            self.ui.nodeFlagsValue.setText(str(self.selected_node.flags))
+            self.ui.vertexCountValue.setText(str(len(self.selected_node.vertices)))
+            self.ui.faceCountValue.setText(str(len(self.selected_node.faces)))
+            self.ui.childCountValue.setText(str(len(self.selected_node.children)))
+
 
     def openFile(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "XBF Files (*.xbf)")
