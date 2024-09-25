@@ -102,14 +102,10 @@ class AnimationViewer(QMainWindow):
         if not self.recent_files:
             self.recent_files = []
 
-        central_widget = QWidget(self)
-        self.setCentralWidget(central_widget)
-
-        self.gl_widget = QOpenGLWidget(self)
-        self.gl_widget.view = gl.GLViewWidget()
-        self.gl_widget.layout = QVBoxLayout(self.gl_widget)
-        self.gl_widget.layout.addWidget(self.gl_widget.view)
-        self.gl_widget.view.setCameraPosition(
+        self.ui.viewer.view = gl.GLViewWidget()
+        self.ui.viewer.layout = QVBoxLayout(self.ui.viewer)
+        self.ui.viewer.layout.addWidget(self.ui.viewer.view)
+        self.ui.viewer.view.setCameraPosition(
             distance=100000,
             elevation = 300,
             azimuth = 90
@@ -148,17 +144,11 @@ class AnimationViewer(QMainWindow):
         scene_details_box.setLayout(scene_details_layout)
         node_details_box.setLayout(node_details_layout)
 
-        sidebar_layout = QVBoxLayout()
-        sidebar_layout.addWidget(scene_details_box)
-        sidebar_layout.addWidget(label)
-        sidebar_layout.addWidget(self.va_nodes_list)
-        sidebar_layout.addWidget(node_details_box)
+        self.ui.sidebar.addWidget(scene_details_box)
+        self.ui.sidebar.addWidget(label)
+        self.ui.sidebar.addWidget(self.va_nodes_list)
+        self.ui.sidebar.addWidget(node_details_box)
 
-        layout = QHBoxLayout(central_widget)
-        layout.addWidget(self.gl_widget)
-        layout.addLayout(sidebar_layout)
-        layout.setStretch(0, 3)  # Give more space to GLWidget (index 0)
-        layout.setStretch(1, 1)  # Give less space to Sidebar (index 1)
 
     def clear_node_details(self):
         self.node_details_widgets['Flags'].setText(f'Flags:')
@@ -169,10 +159,10 @@ class AnimationViewer(QMainWindow):
 
     def cleanup_meshes(self):
         if self.mesh is not None:
-            self.gl_widget.view.removeItem(self.mesh)
+            self.ui.viewer.view.removeItem(self.mesh)
             self.mesh = None
         if self.normal_arrows is not None:
-            self.gl_widget.view.removeItem(self.normal_arrows)
+            self.ui.viewer.view.removeItem(self.normal_arrows)
             self.normal_arrows = None
 
 
@@ -197,7 +187,7 @@ class AnimationViewer(QMainWindow):
                 drawFaces=False,
                 drawEdges=True,
             )
-            self.gl_widget.view.addItem(self.mesh)
+            self.ui.viewer.view.addItem(self.mesh)
 
             self.normal_arrows = gl.GLLinePlotItem(
                 pos=normals,
@@ -205,7 +195,7 @@ class AnimationViewer(QMainWindow):
                 width=2,
                 mode='lines'
             )
-            self.gl_widget.view.addItem(self.normal_arrows)
+            self.ui.viewer.view.addItem(self.normal_arrows)
 
             self.node_details_widgets['Flags'].setText(f'Flags: {self.selected_node.flags}')
             self.node_details_widgets['VertexCount'].setText(f'Vertex #: {len(self.selected_node.vertices)}')
