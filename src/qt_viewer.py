@@ -88,7 +88,7 @@ class AnimationViewer(QMainWindow):
         node_item = QListWidgetItem(node.name)
         if node.vertex_animation:
             node_item.setBackground(QColorConstants.Svg.lightgreen)
-        self.va_nodes_list.addItem(node_item)
+        self.ui.nodeList.addItem(node_item)
 
         for child in node.children:
             self.find_va_nodes(child)
@@ -118,8 +118,7 @@ class AnimationViewer(QMainWindow):
         self.ui.action_Open.triggered.connect(self.openFile)
         self.updateRecentFilesMenu()
 
-        self.va_nodes_list = QListWidget(self)
-        self.va_nodes_list.itemClicked.connect(self.on_node_clicked)
+        self.ui.nodeList.itemClicked.connect(self.on_node_clicked)
 
         label = QLabel("Nodes", self)
 
@@ -134,7 +133,6 @@ class AnimationViewer(QMainWindow):
         node_details_box.setLayout(node_details_layout)
 
         self.ui.sidebar.addWidget(label)
-        self.ui.sidebar.addWidget(self.va_nodes_list)
         self.ui.sidebar.addWidget(node_details_box)
 
 
@@ -208,7 +206,7 @@ class AnimationViewer(QMainWindow):
             qDebug(str(f'Error loading file: {fileName}\n{e}'))
             return
 
-        self.va_nodes_list.clear()
+        self.ui.nodeList.clear()
         self.cleanup_meshes()
         self.clear_node_details()
 

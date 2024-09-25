@@ -20,7 +20,7 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,1">
+   <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,0">
     <item>
      <widget class="QOpenGLWidget" name="viewer">
       <property name="sizePolicy">
@@ -32,45 +32,50 @@
      </widget>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="sidebar">
-      <item>
-       <widget class="QGroupBox" name="sceneDetails">
-        <property name="title">
-         <string>Scene Details</string>
-        </property>
-        <layout class="QFormLayout" name="formLayout">
-         <item row="0" column="0">
-          <widget class="QLabel" name="fileLabel">
-           <property name="text">
-            <string>File:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="fileValue">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="versionLabel">
-           <property name="text">
-            <string>Version:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLabel" name="versionValue">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-     </layout>
+     <widget class="QWidget" name="verticalWidget" native="true">
+      <layout class="QVBoxLayout" name="sidebar">
+       <item>
+        <widget class="QGroupBox" name="sceneDetails">
+         <property name="title">
+          <string>Scene Details</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="fileLabel">
+            <property name="text">
+             <string>File:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="fileValue">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="versionLabel">
+            <property name="text">
+             <string>Version:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="versionValue">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListWidget" name="nodeList"/>
+       </item>
+      </layout>
+     </widget>
     </item>
    </layout>
   </widget>
