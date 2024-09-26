@@ -2,7 +2,6 @@ import sys
 import numpy as np
 from PySide6.QtWidgets import (
     QApplication,
-    QMainWindow,
     QVBoxLayout,
     QListWidgetItem,
     QFileDialog,
@@ -11,7 +10,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QAction, QColorConstants
 from PySide6.QtCore import QTimer, QSettings, qDebug, QFileInfo
 import pyqtgraph.opengl as gl
-from ui_form import Ui_MainWindow
+from PySide6.QtUiTools import QUiLoader
 from xanlib import load_xbf
 
 
@@ -59,14 +58,11 @@ def find_node(node, name):
     return None
 
 
-class AnimationViewer(QMainWindow):
-    def __init__(self):
-        super().__init__()
+class AnimationViewer():
+    def __init__(self, ui):
         self.current_frame = 0
         self.selected_node = None
-
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
+        self.ui = ui
 
         self.initUI()
 
@@ -87,11 +83,11 @@ class AnimationViewer(QMainWindow):
 
 
     def initUI(self):
-        self.setGeometry(100, 100, 1280, 720)
+        self.ui.setGeometry(100, 100, 1280, 720)
 
         self.settings = QSettings('DualNatureStudios', 'AnimationViewer')
         self.recent_files = self.settings.value("recentFiles")
-        if not self.recent_files:
+        if self.recent_files is None:
             self.recent_files = []
 
         self.ui.viewer.view = gl.GLViewWidget()
@@ -103,7 +99,7 @@ class AnimationViewer(QMainWindow):
             azimuth = 90
         )
 
-        self.timer = QTimer(self)
+        self.timer = QTimer(self.ui)
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(33)
 
@@ -130,7 +126,10 @@ class AnimationViewer(QMainWindow):
 
 
     def on_node_selected(self):
-        item = self.ui.nodeList.selectedItems()[0]
+        items = self.ui.nodeList.selectedItems()
+        if not items:
+            return
+        item = items[0]
 
         for node in self.scene.nodes:
             r = find_node(node, item.text())
@@ -169,7 +168,7 @@ class AnimationViewer(QMainWindow):
 
 
     def openFile(self):
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "XBF Files (*.xbf)")
+        fileName, _ = QFileDialog.getOpenFileName(self.ui, "Open File", "", "XBF Files (*.xbf)")
         if fileName:
             self.loadFile(fileName)
 
@@ -207,7 +206,7 @@ class AnimationViewer(QMainWindow):
     def updateRecentFilesMenu(self):
         self.ui.recentMenu.clear()
         for fileName in self.recent_files:
-            action = QAction(fileName, self)
+            action = QAction(fileName, self.ui)
             action.triggered.connect(lambda checked, f=fileName: self.loadFile(f))
             self.ui.recentMenu.addAction(action)
 
@@ -232,9 +231,9 @@ class AnimationViewer(QMainWindow):
 
 
 if __name__ == '__main__':
+    loader = QUiLoader()
     app = QApplication(sys.argv)
-
-    viewer = AnimationViewer()
-    viewer.show()
-
+    ui = loader.load('form.ui')
+    viewer = AnimationViewer(ui)
+    viewer.ui.show()
     sys.exit(app.exec())
