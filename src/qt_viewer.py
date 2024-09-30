@@ -26,10 +26,6 @@ def decompose(vertices):
     return positions, normals
 
 
-def find_node(root, name):
-    return next((node for node in root if node.name == name), None)
-
-
 class AnimationViewer():
     def __init__(self, ui):
         self.current_frame = 0
@@ -41,15 +37,6 @@ class AnimationViewer():
         #TODO: dict of meshes
         self.mesh = None
         self.normal_arrows = None
-
-
-    def add_to_list(self, node):
-
-        node_item = QListWidgetItem(node.name)
-        if node.vertex_animation:
-            node_item.setBackground(QColorConstants.Svg.lightgreen)
-        self.ui.nodeList.addItem(node_item)
-
 
     def initUI(self):
         self.ui.setGeometry(100, 100, 1280, 720)
@@ -100,10 +87,7 @@ class AnimationViewer():
             return
         item = items[0]
 
-        for node in self.scene.nodes:
-            r = find_node(node, item.text())
-            if r is not None:
-                break
+        r = next((node for node in self.scene if node.name == item.text()), None)
 
         if r is not None:
             self.selected_node = r
@@ -158,9 +142,11 @@ class AnimationViewer():
         self.cleanup_meshes()
         self.clear_node_details()
 
-        for root in self.scene.nodes:
-            for node in root:
-                self.add_to_list(node)
+        for node in self.scene:
+            node_item = QListWidgetItem(node.name)
+            if node.vertex_animation:
+                node_item.setBackground(QColorConstants.Svg.lightgreen)
+            self.ui.nodeList.addItem(node_item)
 
         self.ui.fileValue.setText(QFileInfo(self.scene.file).fileName())
         self.ui.versionValue.setText(str(self.scene.version))
