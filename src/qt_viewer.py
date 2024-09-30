@@ -26,16 +26,8 @@ def decompose(vertices):
     return positions, normals
 
 
-def find_node(node, name):
-    if node.name == name:
-        return node
-
-    for child in node.children:
-        r = find_node(child, name)
-        if r is not None:
-            return r
-
-    return None
+def find_node(root, name):
+    return next((node for node in root if node.name == name), None)
 
 
 class AnimationViewer():
@@ -51,15 +43,12 @@ class AnimationViewer():
         self.normal_arrows = None
 
 
-    def find_va_nodes(self, node):
+    def add_to_list(self, node):
 
         node_item = QListWidgetItem(node.name)
         if node.vertex_animation:
             node_item.setBackground(QColorConstants.Svg.lightgreen)
         self.ui.nodeList.addItem(node_item)
-
-        for child in node.children:
-            self.find_va_nodes(child)
 
 
     def initUI(self):
@@ -169,8 +158,9 @@ class AnimationViewer():
         self.cleanup_meshes()
         self.clear_node_details()
 
-        for node in self.scene.nodes:
-            self.find_va_nodes(node)
+        for root in self.scene.nodes:
+            for node in root:
+                self.add_to_list(node)
 
         self.ui.fileValue.setText(QFileInfo(self.scene.file).fileName())
         self.ui.versionValue.setText(str(self.scene.version))
