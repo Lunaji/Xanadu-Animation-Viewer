@@ -94,7 +94,7 @@ class AnimationViewer():
             self.cleanup_meshes()
 
             if self.selected_node.vertex_animation:
-                positions,normals = decompose([v.as_vertex() for v in self.selected_node.vertex_animation.frames[0]])
+                positions,normals = decompose(self.selected_node.vertex_animation.frames[0])
             else:
                 positions,normals = decompose(self.selected_node.vertices)
 
@@ -174,7 +174,7 @@ class AnimationViewer():
             if self.selected_node.vertex_animation is not None:
                 self.current_frame = (self.current_frame + 1) % len(self.selected_node.vertex_animation.frames)
 
-                positions, normals = decompose([v.as_vertex() for v in self.selected_node.vertex_animation.frames[self.current_frame]])
+                positions, normals = decompose(self.selected_node.vertex_animation.frames[self.current_frame])
 
                 if self.mesh is not None:
                     self.mesh.setMeshData(
