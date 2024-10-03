@@ -20,8 +20,28 @@ from PySide6.QtCore import (
 import pyqtgraph.opengl as gl
 from PySide6.QtUiTools import QUiLoader
 from xanlib import load_xbf
+from typing import NamedTuple
+
+
+class Mesh(NamedTuple):
+    mesh: gl.GLMeshItem
+    normals: gl.GLLinePlotItem
+
+def decompose(vertices):
+    positions = np.array([v.position for v in vertices])
+
+    norm_scale = 100
+    norm_ends = positions + norm_scale*np.array([v.normal for v in vertices])
+    normals = np.empty((len(vertices)*2,3))
+    normals[0::2] = positions
+    normals[1::2] = norm_ends
+
+    return positions, normals
 
 class SceneModel(QAbstractItemModel):
+
+    MESH_ROLE = Qt.UserRole + 1
+
     def __init__(self, scene, parent=None):
         super().__init__(parent)
         self.scene = scene
@@ -77,6 +97,9 @@ class SceneModel(QAbstractItemModel):
             elif column == 2:
                 return Qt.Checked if node.key_animation is not None else Qt.Unchecked
 
+        if role == self.MESH_ROLE:
+            return self.get_mesh(node)
+
         return None
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
@@ -89,17 +112,26 @@ class SceneModel(QAbstractItemModel):
                 return "K"
         return None
 
+    def get_mesh(self, node):
 
-def decompose(vertices):
-    positions = np.array([v.position for v in vertices])
+        positions,normals = decompose(node.vertices)
 
-    norm_scale = 100
-    norm_ends = positions + norm_scale*np.array([v.normal for v in vertices])
-    normals = np.empty((len(vertices)*2,3))
-    normals[0::2] = positions
-    normals[1::2] = norm_ends
+        mesh = gl.GLMeshItem(
+            vertexes=positions,
+            faces=np.array([face.vertex_indices for face in node.faces]),
+            drawFaces=False,
+            drawEdges=True,
+        )
 
-    return positions, normals
+        normal_arrows = gl.GLLinePlotItem(
+            pos=normals,
+            color=(1, 0, 0, 1),
+            width=2,
+            mode='lines'
+        )
+
+        return Mesh(mesh, normal_arrows)
+
 
 
 class AnimationViewer():
@@ -109,10 +141,6 @@ class AnimationViewer():
         self.ui = ui
 
         self.initUI()
-
-        #TODO: dict of meshes
-        self.mesh = None
-        self.normal_arrows = None
 
     def initUI(self):
         self.ui.setGeometry(100, 100, 1280, 720)
@@ -147,12 +175,7 @@ class AnimationViewer():
 
 
     def cleanup_meshes(self):
-        if self.mesh is not None:
-            self.ui.viewer.view.removeItem(self.mesh)
-            self.mesh = None
-        if self.normal_arrows is not None:
-            self.ui.viewer.view.removeItem(self.normal_arrows)
-            self.normal_arrows = None
+        self.ui.viewer.view.clear()
 
 
     def on_node_selected(self, selected, deselected):
@@ -160,34 +183,27 @@ class AnimationViewer():
         if not selected.indexes():
             return
 
-        self.selected_node = selected.indexes()[0].internalPointer()
+        #self.selected_node = selected.indexes()[0].internalPointer()
         self.cleanup_meshes()
 
         # if self.selected_node.vertex_animation is not None and self.selected_node.vertex_animation.frames is not None:
         #     positions,normals = decompose(self.selected_node.vertex_animation.frames[0])
         # else:
-        positions,normals = decompose(self.selected_node.vertices)
 
-        self.mesh = gl.GLMeshItem(
-            vertexes=positions,
-            faces=np.array([face.vertex_indices for face in self.selected_node.faces]),
-            drawFaces=False,
-            drawEdges=True,
-        )
-        self.ui.viewer.view.addItem(self.mesh)
+        selected_index = selected.indexes()[0]
+        meshes = selected_index.model().data(selected_index, SceneModel.MESH_ROLE)
 
-        self.normal_arrows = gl.GLLinePlotItem(
-            pos=normals,
-            color=(1, 0, 0, 1),
-            width=2,
-            mode='lines'
-        )
-        self.ui.viewer.view.addItem(self.normal_arrows)
+        for mesh in meshes:
+            self.ui.viewer.view.addItem(mesh)
 
-        self.ui.nodeFlagsValue.setText(str(self.selected_node.flags))
-        self.ui.vertexCountValue.setText(str(len(self.selected_node.vertices)))
-        self.ui.faceCountValue.setText(str(len(self.selected_node.faces)))
-        self.ui.childCountValue.setText(str(len(self.selected_node.children)))
+
+
+
+        selected_node = selected_index.internalPointer()
+        self.ui.nodeFlagsValue.setText(str(selected_node.flags))
+        self.ui.vertexCountValue.setText(str(len(selected_node.vertices)))
+        self.ui.faceCountValue.setText(str(len(selected_node.faces)))
+        self.ui.childCountValue.setText(str(len(selected_node.children)))
 
 
     def openFile(self):
