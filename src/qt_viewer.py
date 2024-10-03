@@ -136,13 +136,7 @@ class SceneModel(QAbstractItemModel):
 
 class AnimationViewer():
     def __init__(self, ui):
-        self.current_frame = 0
-        self.selected_node = None
         self.ui = ui
-
-        self.initUI()
-
-    def initUI(self):
         self.ui.setGeometry(100, 100, 1280, 720)
 
         self.settings = QSettings('DualNatureStudios', 'AnimationViewer')
@@ -159,6 +153,7 @@ class AnimationViewer():
             azimuth = 90
         )
 
+        # self.current_frame = 0
         # self.timer = QTimer(self.ui)
         # self.timer.timeout.connect(self.update_frame)
         # self.timer.start(33)
@@ -183,7 +178,6 @@ class AnimationViewer():
         if not selected.indexes():
             return
 
-        #self.selected_node = selected.indexes()[0].internalPointer()
         self.cleanup_meshes()
 
         # if self.selected_node.vertex_animation is not None and self.selected_node.vertex_animation.frames is not None:
@@ -195,9 +189,6 @@ class AnimationViewer():
 
         for mesh in meshes:
             self.ui.viewer.view.addItem(mesh)
-
-
-
 
         selected_node = selected_index.internalPointer()
         self.ui.nodeFlagsValue.setText(str(selected_node.flags))
