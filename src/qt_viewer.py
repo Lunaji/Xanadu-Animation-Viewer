@@ -131,9 +131,9 @@ class AnimationViewer():
             azimuth = 90
         )
 
-        self.timer = QTimer(self.ui)
-        self.timer.timeout.connect(self.update_frame)
-        self.timer.start(33)
+        # self.timer = QTimer(self.ui)
+        # self.timer.timeout.connect(self.update_frame)
+        # self.timer.start(33)
 
         self.ui.action_Open.triggered.connect(self.openFile)
         self.updateRecentFilesMenu()
@@ -163,10 +163,10 @@ class AnimationViewer():
         self.selected_node = selected.indexes()[0].internalPointer()
         self.cleanup_meshes()
 
-        if self.selected_node.vertex_animation is not None and self.selected_node.vertex_animation.frames is not None:
-            positions,normals = decompose(self.selected_node.vertex_animation.frames[0])
-        else:
-            positions,normals = decompose(self.selected_node.vertices)
+        # if self.selected_node.vertex_animation is not None and self.selected_node.vertex_animation.frames is not None:
+        #     positions,normals = decompose(self.selected_node.vertex_animation.frames[0])
+        # else:
+        positions,normals = decompose(self.selected_node.vertices)
 
         self.mesh = gl.GLMeshItem(
             vertexes=positions,
@@ -243,22 +243,23 @@ class AnimationViewer():
 
 
     def update_frame(self):
+        return
 
-        if self.selected_node is not None:
+        # if self.selected_node is not None:
 
-            if self.selected_node.vertex_animation is not None and self.selected_node.vertex_animation.frames is not None:
-                self.current_frame = (self.current_frame + 1) % len(self.selected_node.vertex_animation.frames)
+        #     if self.selected_node.vertex_animation is not None and self.selected_node.vertex_animation.frames is not None:
+        #         self.current_frame = (self.current_frame + 1) % len(self.selected_node.vertex_animation.frames)
 
-                positions, normals = decompose(self.selected_node.vertex_animation.frames[self.current_frame])
+        #         positions, normals = decompose(self.selected_node.vertex_animation.frames[self.current_frame])
 
-                if self.mesh is not None:
-                    self.mesh.setMeshData(
-                        vertexes=positions,
-                        faces=np.array([face.vertex_indices for face in self.selected_node.faces]),
-                    )
+        #         if self.mesh is not None:
+        #             self.mesh.setMeshData(
+        #                 vertexes=positions,
+        #                 faces=np.array([face.vertex_indices for face in self.selected_node.faces]),
+        #             )
 
-                if self.normal_arrows is not None:
-                    self.normal_arrows.setData(pos=normals)
+        #         if self.normal_arrows is not None:
+        #             self.normal_arrows.setData(pos=normals)
 
 
 if __name__ == '__main__':
