@@ -206,7 +206,7 @@ class AnimationViewer():
     def loadFile(self, fileName):
 
         try:
-            self.scene = load_xbf(fileName)
+            scene = load_xbf(fileName)
         except Exception as e:
             error_dialog = QMessageBox(self)
             error_dialog.setIcon(QMessageBox.Critical)
@@ -222,7 +222,7 @@ class AnimationViewer():
 
 
 
-        self.scene_model = SceneModel(self.scene)
+        self.scene_model = SceneModel(scene)
         ui.nodeList.setModel(self.scene_model)
         self.ui.nodeList.selectionModel().selectionChanged.connect(self.on_node_selected)
         #Expand root nodes
@@ -234,7 +234,7 @@ class AnimationViewer():
         self.ui.nodeList.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.ui.nodeList.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
 
-        for node in self.scene:
+        for node in scene:
             items = self.scene_model.get_mesh(node)
             self.gl_items[node.name] = { 'mesh': items.mesh, 'normal': items.normals }
             for item in items:
@@ -242,8 +242,8 @@ class AnimationViewer():
                 self.ui.viewer.view.addItem(item)
 
 
-        self.ui.fileValue.setText(QFileInfo(self.scene.file).fileName())
-        self.ui.versionValue.setText(str(self.scene.version))
+        self.ui.fileValue.setText(QFileInfo(scene.file).fileName())
+        self.ui.versionValue.setText(str(scene.version))
 
         if fileName in self.recent_files:
             self.recent_files.remove(fileName)
