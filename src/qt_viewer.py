@@ -129,7 +129,6 @@ class SceneModel(QAbstractItemModel):
             width=2,
             mode='lines'
         )
-        normal_arrows.setVisible(False)
 
         return Mesh(mesh, normal_arrows)
 
@@ -145,6 +144,9 @@ class AnimationViewer():
         if self.recent_files is None:
             self.recent_files = []
 
+
+        self.gl_items = {}
+
         self.ui.viewer.view = gl.GLViewWidget()
         self.ui.viewer.layout = QVBoxLayout(self.ui.viewer)
         self.ui.viewer.layout.addWidget(self.ui.viewer.view)
@@ -153,11 +155,6 @@ class AnimationViewer():
             elevation = 300,
             azimuth = 90
         )
-
-        # self.current_frame = 0
-        # self.timer = QTimer(self.ui)
-        # self.timer.timeout.connect(self.update_frame)
-        # self.timer.start(33)
 
         self.ui.action_Open.triggered.connect(self.openFile)
         self.updateRecentFilesMenu()
@@ -183,28 +180,18 @@ class AnimationViewer():
         self.ui.childCountValue.setText('')
 
 
-    def cleanup_meshes(self):
-        self.ui.viewer.view.clear()
-
-
     def on_node_selected(self, selected, deselected):
 
         if not selected.indexes():
             return
 
-        self.cleanup_meshes()
+        for item in self.ui.viewer.view.items:
+            item.setVisible(False)
 
-        # if self.selected_node.vertex_animation is not None and self.selected_node.vertex_animation.frames is not None:
-        #     positions,normals = decompose(self.selected_node.vertex_animation.frames[0])
-        # else:
+        selected_node = selected.indexes()[0].internalPointer()
 
-        selected_index = selected.indexes()[0]
-        meshes = selected_index.model().data(selected_index, SceneModel.MESH_ROLE)
+        self.gl_items[selected_node.name]['mesh'].setVisible(True)
 
-        for mesh in meshes:
-            self.ui.viewer.view.addItem(mesh)
-
-        selected_node = selected_index.internalPointer()
         self.ui.nodeFlagsValue.setText(str(selected_node.flags))
         self.ui.vertexCountValue.setText(str(len(selected_node.vertices)))
         self.ui.faceCountValue.setText(str(len(selected_node.faces)))
@@ -229,8 +216,11 @@ class AnimationViewer():
             qDebug(str(f'Error loading file: {fileName}\n{e}'))
             return
 
-        self.cleanup_meshes()
+        self.ui.viewer.view.clear() # reset() ?
+        self.gl_items = {}
         self.clear_node_details()
+
+
 
         self.scene_model = SceneModel(self.scene)
         ui.nodeList.setModel(self.scene_model)
@@ -243,6 +233,14 @@ class AnimationViewer():
         self.ui.nodeList.header().setSectionResizeMode(0, QHeaderView.Stretch)
         self.ui.nodeList.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.ui.nodeList.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+
+        for node in self.scene:
+            items = self.scene_model.get_mesh(node)
+            self.gl_items[node.name] = { 'mesh': items.mesh, 'normal': items.normals }
+            for item in items:
+                item.setVisible(False)
+                self.ui.viewer.view.addItem(item)
+
 
         self.ui.fileValue.setText(QFileInfo(self.scene.file).fileName())
         self.ui.versionValue.setText(str(self.scene.version))
@@ -261,26 +259,6 @@ class AnimationViewer():
             action = QAction(fileName, self.ui)
             action.triggered.connect(lambda checked, f=fileName: self.loadFile(f))
             self.ui.recentMenu.addAction(action)
-
-
-    def update_frame(self):
-        return
-
-        # if self.selected_node is not None:
-
-        #     if self.selected_node.vertex_animation is not None and self.selected_node.vertex_animation.frames is not None:
-        #         self.current_frame = (self.current_frame + 1) % len(self.selected_node.vertex_animation.frames)
-
-        #         positions, normals = decompose(self.selected_node.vertex_animation.frames[self.current_frame])
-
-        #         if self.mesh is not None:
-        #             self.mesh.setMeshData(
-        #                 vertexes=positions,
-        #                 faces=np.array([face.vertex_indices for face in self.selected_node.faces]),
-        #             )
-
-        #         if self.normal_arrows is not None:
-        #             self.normal_arrows.setData(pos=normals)
 
 
 if __name__ == '__main__':
