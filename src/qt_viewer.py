@@ -3,11 +3,10 @@ import numpy as np
 from PySide6.QtWidgets import (
     QApplication,
     QVBoxLayout,
-    QListWidgetItem,
     QFileDialog,
     QMessageBox,
 )
-from PySide6.QtGui import QAction, QColorConstants
+from PySide6.QtGui import QAction
 from PySide6.QtCore import (
     QTimer,
     QSettings,
@@ -24,23 +23,37 @@ from xanlib import load_xbf
 class SceneModel(QAbstractItemModel):
     def __init__(self, scene, parent=None):
         super().__init__(parent)
-        self.nodes = [node for node in scene]
+        self.scene = scene
 
     def index(self, row, column, parent=QModelIndex()):
-        return self.createIndex(row, column, self.nodes[row])
+        if not parent.isValid():
+            node = self.scene.nodes[row]
+        else:
+            parent_node = parent.internalPointer()
+            node = parent_node.children[row]
+        return self.createIndex(row, column, node)
 
     def parent(self, index):
+        if not index.isValid():
+            return QModelIndex()
         child = index.internalPointer()
-        if child.parent is None:
+        parent_node = child.parent
+        if parent_node is None: #assert can't ?
             return QModelIndex()
-        row = next((i for i,node in self.nodes if node==child.parent), None)
-        if row is None:
+
+        grandparent_node = parent_node.parent
+        if grandparent_node is None:
+            nodes_row = self.scene.nodes
+        else:
+            nodes_row = grandparent_node.children
+        row = next((i for i,node in enumerate(nodes_row) if node==parent_node), None)
+        if row is None: # assert can't ?
             return QModelIndex()
-        return self.createIndex(row, 0, child.parent)
+        return self.createIndex(row, 0, parent_node)
 
     def rowCount(self, index=QModelIndex()):
         if not index.isValid():
-            return len([root for root in self.nodes if root.parent is None])
+            return len([node for node in self.scene if node.parent is None])
         return len(index.internalPointer().children)
 
     def columnCount(self, index=QModelIndex()):
@@ -105,8 +118,6 @@ class AnimationViewer():
         self.ui.action_Open.triggered.connect(self.openFile)
         self.updateRecentFilesMenu()
 
-        self.ui.nodeList.itemSelectionChanged.connect(self.on_node_selected)
-
 
     def clear_node_details(self):
         self.ui.nodeFlagsValue.setText('')
@@ -124,43 +135,39 @@ class AnimationViewer():
             self.normal_arrows = None
 
 
-    def on_node_selected(self):
-        items = self.ui.nodeList.selectedItems()
-        if not items:
+    def on_node_selected(self, selected, deselected):
+
+        if not selected.indexes():
             return
-        item = items[0]
 
-        r = next((node for node in self.scene if node.name == item.text()), None)
+        self.selected_node = selected.indexes()[0].internalPointer()
+        self.cleanup_meshes()
 
-        if r is not None:
-            self.selected_node = r
-            self.cleanup_meshes()
+        if self.selected_node.vertex_animation is not None and self.selected_node.vertex_animation.frames is not None:
+            positions,normals = decompose(self.selected_node.vertex_animation.frames[0])
+        else:
+            positions,normals = decompose(self.selected_node.vertices)
 
-            if self.selected_node.vertex_animation is not None and self.selected_node.vertex_animation.frames is not None:
-                positions,normals = decompose(self.selected_node.vertex_animation.frames[0])
-            else:
-                positions,normals = decompose(self.selected_node.vertices)
+        self.mesh = gl.GLMeshItem(
+            vertexes=positions,
+            faces=np.array([face.vertex_indices for face in self.selected_node.faces]),
+            drawFaces=False,
+            drawEdges=True,
+        )
+        self.ui.viewer.view.addItem(self.mesh)
 
-            self.mesh = gl.GLMeshItem(
-                vertexes=positions,
-                faces=np.array([face.vertex_indices for face in self.selected_node.faces]),
-                drawFaces=False,
-                drawEdges=True,
-            )
-            self.ui.viewer.view.addItem(self.mesh)
+        self.normal_arrows = gl.GLLinePlotItem(
+            pos=normals,
+            color=(1, 0, 0, 1),
+            width=2,
+            mode='lines'
+        )
+        self.ui.viewer.view.addItem(self.normal_arrows)
 
-            self.normal_arrows = gl.GLLinePlotItem(
-                pos=normals,
-                color=(1, 0, 0, 1),
-                width=2,
-                mode='lines'
-            )
-            self.ui.viewer.view.addItem(self.normal_arrows)
-
-            self.ui.nodeFlagsValue.setText(str(self.selected_node.flags))
-            self.ui.vertexCountValue.setText(str(len(self.selected_node.vertices)))
-            self.ui.faceCountValue.setText(str(len(self.selected_node.faces)))
-            self.ui.childCountValue.setText(str(len(self.selected_node.children)))
+        self.ui.nodeFlagsValue.setText(str(self.selected_node.flags))
+        self.ui.vertexCountValue.setText(str(len(self.selected_node.vertices)))
+        self.ui.faceCountValue.setText(str(len(self.selected_node.faces)))
+        self.ui.childCountValue.setText(str(len(self.selected_node.children)))
 
 
     def openFile(self):
@@ -181,15 +188,12 @@ class AnimationViewer():
             qDebug(str(f'Error loading file: {fileName}\n{e}'))
             return
 
-        self.ui.nodeList.clear()
         self.cleanup_meshes()
         self.clear_node_details()
 
-        for node in self.scene:
-            node_item = QListWidgetItem(node.name)
-            if node.vertex_animation:
-                node_item.setBackground(QColorConstants.Svg.lightgreen)
-            self.ui.nodeList.addItem(node_item)
+        self.scene_model = SceneModel(self.scene)
+        ui.nodeList.setModel(self.scene_model)
+        self.ui.nodeList.selectionModel().selectionChanged.connect(self.on_node_selected)
 
         self.ui.fileValue.setText(QFileInfo(self.scene.file).fileName())
         self.ui.versionValue.setText(str(self.scene.version))
