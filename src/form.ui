@@ -72,7 +72,11 @@
         </widget>
        </item>
        <item>
-        <widget class="QTreeView" name="nodeList"/>
+        <widget class="QTreeView" name="nodeList">
+         <attribute name="headerStretchLastSection">
+          <bool>false</bool>
+         </attribute>
+        </widget>
        </item>
        <item>
         <widget class="QGroupBox" name="nodeDetails">

@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QFileDialog,
     QMessageBox,
+    QHeaderView
 )
 from PySide6.QtGui import QAction
 from PySide6.QtCore import (
@@ -83,9 +84,9 @@ class SceneModel(QAbstractItemModel):
             if section == 0:
                 return "Node Name"
             elif section == 1:
-                return "Vertex Anim"
+                return "V"
             elif section == 2:
-                return "Key Anim"
+                return "K"
         return None
 
 
@@ -218,6 +219,9 @@ class AnimationViewer():
         for row in range(self.scene_model.rowCount()):
             index = self.scene_model.index(row, 0)
             self.ui.nodeList.setExpanded(index, True)
+        self.ui.nodeList.header().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.ui.nodeList.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.ui.nodeList.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
 
         self.ui.fileValue.setText(QFileInfo(self.scene.file).fileName())
         self.ui.versionValue.setText(str(self.scene.version))
