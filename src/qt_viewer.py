@@ -161,6 +161,14 @@ class AnimationViewer():
         self.ui.action_Open.triggered.connect(self.openFile)
         self.updateRecentFilesMenu()
 
+        self.ui.actionToggle_Wireframe.triggered.connect(self.toggle_wireframe)
+
+
+    def toggle_wireframe(self):
+        for mesh in filter(lambda item: isinstance(item, gl.GLMeshItem), self.ui.viewer.view.items):
+            mesh.opts['drawFaces'] = not mesh.opts['drawFaces']
+        self.ui.viewer.view.update()
+
 
     def clear_node_details(self):
         self.ui.nodeFlagsValue.setText('')
