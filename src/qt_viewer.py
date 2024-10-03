@@ -57,21 +57,35 @@ class SceneModel(QAbstractItemModel):
         return len(index.internalPointer().children)
 
     def columnCount(self, index=QModelIndex()):
-        return 1
+        return 3
 
     def data(self, index, role=Qt.DisplayRole):
         if not index.isValid():
             return None
 
+        node = index.internalPointer()
+        column = index.column()
+
         if role == Qt.DisplayRole:
-            node = index.internalPointer()
-            return node.name
+            if column == 0:
+                return node.name
+
+        if role == Qt.CheckStateRole:
+            if column == 1:
+                return Qt.Checked if node.vertex_animation is not None else Qt.Unchecked
+            elif column == 2:
+                return Qt.Checked if node.key_animation is not None else Qt.Unchecked
 
         return None
 
-    def headerData(self, section, orientation, role):
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-            return "Node Name"
+            if section == 0:
+                return "Node Name"
+            elif section == 1:
+                return "Vertex Anim"
+            elif section == 2:
+                return "Key Anim"
         return None
 
 
