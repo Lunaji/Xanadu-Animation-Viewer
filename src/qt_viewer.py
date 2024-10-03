@@ -9,7 +9,6 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QAction
 from PySide6.QtCore import (
-    QTimer,
     QSettings,
     qDebug,
     QFileInfo,
@@ -39,8 +38,6 @@ def decompose(vertices):
     return positions, normals
 
 class SceneModel(QAbstractItemModel):
-
-    MESH_ROLE = Qt.UserRole + 1
 
     def __init__(self, scene, parent=None):
         super().__init__(parent)
@@ -96,9 +93,6 @@ class SceneModel(QAbstractItemModel):
                 return Qt.Checked if node.vertex_animation is not None else Qt.Unchecked
             elif column == 2:
                 return Qt.Checked if node.key_animation is not None else Qt.Unchecked
-
-        if role == self.MESH_ROLE:
-            return self.get_mesh(node)
 
         return None
 
