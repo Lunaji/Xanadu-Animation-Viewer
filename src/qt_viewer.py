@@ -213,6 +213,11 @@ class AnimationViewer():
         self.scene_model = SceneModel(self.scene)
         ui.nodeList.setModel(self.scene_model)
         self.ui.nodeList.selectionModel().selectionChanged.connect(self.on_node_selected)
+        #Expand root nodes
+        #Maybe TODO: only if a limited number
+        for row in range(self.scene_model.rowCount()):
+            index = self.scene_model.index(row, 0)
+            self.ui.nodeList.setExpanded(index, True)
 
         self.ui.fileValue.setText(QFileInfo(self.scene.file).fileName())
         self.ui.versionValue.setText(str(self.scene.version))
