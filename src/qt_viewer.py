@@ -129,6 +129,7 @@ class SceneModel(QAbstractItemModel):
             width=2,
             mode='lines'
         )
+        normal_arrows.setVisible(False)
 
         return Mesh(mesh, normal_arrows)
 
@@ -162,12 +163,17 @@ class AnimationViewer():
         self.updateRecentFilesMenu()
 
         self.ui.actionToggle_Wireframe.triggered.connect(self.toggle_wireframe)
+        self.ui.actionToggle_Normals.triggered.connect(self.toggle_normals)
 
 
     def toggle_wireframe(self):
         for mesh in filter(lambda item: isinstance(item, gl.GLMeshItem), self.ui.viewer.view.items):
             mesh.opts['drawFaces'] = not mesh.opts['drawFaces']
         self.ui.viewer.view.update()
+
+    def toggle_normals(self):
+        for normals in filter(lambda item: isinstance(item, gl.GLLinePlotItem), self.ui.viewer.view.items):
+            normals.setVisible(not normals.visible())
 
 
     def clear_node_details(self):

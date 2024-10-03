@@ -184,6 +184,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionToggle_Wireframe"/>
+   <addaction name="actionToggle_Normals"/>
   </widget>
   <action name="action_Open">
    <property name="text">
@@ -213,6 +214,20 @@
    </property>
    <property name="text">
     <string>Toggle Wireframe</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionToggle_Normals">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="go-up"/>
+   </property>
+   <property name="text">
+    <string>Toggle Normals</string>
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::NoRole</enum>
