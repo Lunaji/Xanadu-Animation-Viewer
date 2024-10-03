@@ -53,7 +53,7 @@ class SceneModel(QAbstractItemModel):
 
     def rowCount(self, index=QModelIndex()):
         if not index.isValid():
-            return len([node for node in self.scene if node.parent is None])
+            return len(self.scene.nodes)
         return len(index.internalPointer().children)
 
     def columnCount(self, index=QModelIndex()):
