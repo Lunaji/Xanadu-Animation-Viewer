@@ -69,6 +69,11 @@ class SceneModel(QAbstractItemModel):
 
         return None
 
+    def headerData(self, section, orientation, role):
+        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+            return "Node Name"
+        return None
+
 
 def decompose(vertices):
     positions = np.array([v.position for v in vertices])
