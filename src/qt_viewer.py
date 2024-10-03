@@ -8,10 +8,53 @@ from PySide6.QtWidgets import (
     QMessageBox,
 )
 from PySide6.QtGui import QAction, QColorConstants
-from PySide6.QtCore import QTimer, QSettings, qDebug, QFileInfo
+from PySide6.QtCore import (
+    QTimer,
+    QSettings,
+    qDebug,
+    QFileInfo,
+    QAbstractItemModel,
+    Qt,
+    QModelIndex
+)
 import pyqtgraph.opengl as gl
 from PySide6.QtUiTools import QUiLoader
 from xanlib import load_xbf
+
+class SceneModel(QAbstractItemModel):
+    def __init__(self, scene, parent=None):
+        super().__init__(parent)
+        self.nodes = [node for node in scene]
+
+    def index(self, row, column, parent=QModelIndex()):
+        return self.createIndex(row, column, self.nodes[row])
+
+    def parent(self, index):
+        child = index.internalPointer()
+        if child.parent is None:
+            return QModelIndex()
+        row = next((i for i,node in self.nodes if node==child.parent), None)
+        if row is None:
+            return QModelIndex()
+        return self.createIndex(row, 0, child.parent)
+
+    def rowCount(self, index=QModelIndex()):
+        if not index.isValid():
+            return len([root for root in self.nodes if root.parent is None])
+        return len(index.internalPointer().children)
+
+    def columnCount(self, index=QModelIndex()):
+        return 1
+
+    def data(self, index, role=Qt.DisplayRole):
+        if not index.isValid():
+            return None
+
+        if role == Qt.DisplayRole:
+            node = index.internalPointer()
+            return node.name
+
+        return None
 
 
 def decompose(vertices):
