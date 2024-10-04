@@ -37,6 +37,27 @@ def decompose(vertices):
 
     return positions, normals
 
+def get_mesh(node):
+
+    positions,normals = decompose(node.vertices)
+
+    mesh = gl.GLMeshItem(
+        vertexes=positions,
+        faces=np.array([face.vertex_indices for face in node.faces]),
+        drawFaces=False,
+        drawEdges=True,
+    )
+
+    normal_arrows = gl.GLLinePlotItem(
+        pos=normals,
+        color=(1, 0, 0, 1),
+        width=2,
+        mode='lines'
+    )
+
+    return Mesh(mesh, normal_arrows)
+
+
 class SceneModel(QAbstractItemModel):
 
     def __init__(self, scene, parent=None):
@@ -105,27 +126,6 @@ class SceneModel(QAbstractItemModel):
             elif section == 2:
                 return "K"
         return None
-
-    def get_mesh(self, node):
-
-        positions,normals = decompose(node.vertices)
-
-        mesh = gl.GLMeshItem(
-            vertexes=positions,
-            faces=np.array([face.vertex_indices for face in node.faces]),
-            drawFaces=False,
-            drawEdges=True,
-        )
-
-        normal_arrows = gl.GLLinePlotItem(
-            pos=normals,
-            color=(1, 0, 0, 1),
-            width=2,
-            mode='lines'
-        )
-
-        return Mesh(mesh, normal_arrows)
-
 
 
 class AnimationViewer():
@@ -229,7 +229,7 @@ class AnimationViewer():
         self.ui.nodeList.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
 
         for node in scene:
-            items = self.scene_model.get_mesh(node)
+            items = get_mesh(node)
             self.gl_items[node.name] = { 'mesh': items.mesh, 'normal': items.normals }
             for item in items:
                 item.setVisible(False)
