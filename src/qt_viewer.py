@@ -14,11 +14,7 @@ from PySide6.QtUiTools import QUiLoader
 from xanlib import load_xbf
 
 
-def convert_signed_5bit(v):
-    sign=-1 if (v%32)>15 else 1
-    return sign*(v%16)
-
-def decompose_regular(vertices):
+def decompose(vertices):
     positions = np.array([v.position for v in vertices])
 
     norm_scale = 100
@@ -28,34 +24,6 @@ def decompose_regular(vertices):
     normals[1::2] = norm_ends
 
     return positions, normals
-
-
-def decompose_animated(vertices):
-    positions = np.array([vertex[:3] for vertex in vertices])
-
-    norm_scale = 100
-    norm_ends = positions + norm_scale*np.array([
-            [
-                convert_signed_5bit((vertex[3] >> x) & 0x1F)
-                for x in (0, 5, 10)
-            ] for vertex in vertices
-        ])
-    normals = np.empty((len(vertices)*2,3))
-    normals[0::2] = positions
-    normals[1::2] = norm_ends
-
-    return positions, normals
-
-def find_node(node, name):
-    if node.name == name:
-        return node
-
-    for child in node.children:
-        r = find_node(child, name)
-        if r is not None:
-            return r
-
-    return None
 
 
 class AnimationViewer():
@@ -69,18 +37,6 @@ class AnimationViewer():
         #TODO: dict of meshes
         self.mesh = None
         self.normal_arrows = None
-
-
-    def find_va_nodes(self, node):
-
-        node_item = QListWidgetItem(node.name)
-        if node.vertex_animation:
-            node_item.setBackground(QColorConstants.Svg.lightgreen)
-        self.ui.nodeList.addItem(node_item)
-
-        for child in node.children:
-            self.find_va_nodes(child)
-
 
     def initUI(self):
         self.ui.setGeometry(100, 100, 1280, 720)
@@ -131,19 +87,16 @@ class AnimationViewer():
             return
         item = items[0]
 
-        for node in self.scene.nodes:
-            r = find_node(node, item.text())
-            if r is not None:
-                break
+        r = next((node for node in self.scene if node.name == item.text()), None)
 
         if r is not None:
             self.selected_node = r
             self.cleanup_meshes()
 
-            if self.selected_node.vertex_animation:
-                positions,normals = decompose_animated(self.selected_node.vertex_animation.body[0])
+            if self.selected_node.vertex_animation is not None and self.selected_node.vertex_animation.frames is not None:
+                positions,normals = decompose(self.selected_node.vertex_animation.frames[0])
             else:
-                positions,normals = decompose_regular(self.selected_node.vertices)
+                positions,normals = decompose(self.selected_node.vertices)
 
             self.mesh = gl.GLMeshItem(
                 vertexes=positions,
@@ -189,8 +142,11 @@ class AnimationViewer():
         self.cleanup_meshes()
         self.clear_node_details()
 
-        for node in self.scene.nodes:
-            self.find_va_nodes(node)
+        for node in self.scene:
+            node_item = QListWidgetItem(node.name)
+            if node.vertex_animation:
+                node_item.setBackground(QColorConstants.Svg.lightgreen)
+            self.ui.nodeList.addItem(node_item)
 
         self.ui.fileValue.setText(QFileInfo(self.scene.file).fileName())
         self.ui.versionValue.setText(str(self.scene.version))
@@ -215,10 +171,10 @@ class AnimationViewer():
 
         if self.selected_node is not None:
 
-            if self.selected_node.vertex_animation is not None:
-                self.current_frame = (self.current_frame + 1) % len(self.selected_node.vertex_animation.body)
+            if self.selected_node.vertex_animation is not None and self.selected_node.vertex_animation.frames is not None:
+                self.current_frame = (self.current_frame + 1) % len(self.selected_node.vertex_animation.frames)
 
-                positions, normals = decompose_animated(self.selected_node.vertex_animation.body[self.current_frame])
+                positions, normals = decompose(self.selected_node.vertex_animation.frames[self.current_frame])
 
                 if self.mesh is not None:
                     self.mesh.setMeshData(
