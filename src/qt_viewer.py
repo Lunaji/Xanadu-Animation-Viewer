@@ -163,9 +163,10 @@ class AnimationViewer():
         self.ui.viewer.view.update()
 
     def toggle_normals(self):
-        for normals in filter(lambda item: isinstance(item, gl.GLLinePlotItem), self.ui.viewer.view.items):
-            normals.setVisible(not normals.visible())
-
+        for key in self.gl_items:
+            if self.gl_items[key]['mesh'].visible():
+                normals = self.gl_items[key]['normals']
+                normals.setVisible(not normals.visible())
 
     def clear_node_details(self):
         self.ui.nodeFlagsValue.setText('')
@@ -187,6 +188,8 @@ class AnimationViewer():
         mesh = self.gl_items.get(selected_node.name)
         if mesh is not None:
             mesh['mesh'].setVisible(True)
+            if self.ui.actionToggle_Normals.isChecked():
+                mesh['normals'].setVisible(True)
 
         self.ui.nodeFlagsValue.setText(str(selected_node.flags))
         self.ui.vertexCountValue.setText(str(len(selected_node.vertices)))
@@ -233,7 +236,7 @@ class AnimationViewer():
         for node in scene:
             if node.vertices:
                 items = get_mesh(node)
-                self.gl_items[node.name] = { 'mesh': items.mesh, 'normal': items.normals }
+                self.gl_items[node.name] = { 'mesh': items.mesh, 'normals': items.normals }
                 for item in items:
                     item.setVisible(False)
                     self.ui.viewer.view.addItem(item)
