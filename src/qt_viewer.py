@@ -184,7 +184,9 @@ class AnimationViewer():
 
         selected_node = selected.indexes()[0].internalPointer()
 
-        self.gl_items[selected_node.name]['mesh'].setVisible(True)
+        mesh = self.gl_items.get(selected_node.name)
+        if mesh is not None:
+            mesh['mesh'].setVisible(True)
 
         self.ui.nodeFlagsValue.setText(str(selected_node.flags))
         self.ui.vertexCountValue.setText(str(len(selected_node.vertices)))
@@ -229,11 +231,12 @@ class AnimationViewer():
         self.ui.nodeList.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
 
         for node in scene:
-            items = get_mesh(node)
-            self.gl_items[node.name] = { 'mesh': items.mesh, 'normal': items.normals }
-            for item in items:
-                item.setVisible(False)
-                self.ui.viewer.view.addItem(item)
+            if node.vertices:
+                items = get_mesh(node)
+                self.gl_items[node.name] = { 'mesh': items.mesh, 'normal': items.normals }
+                for item in items:
+                    item.setVisible(False)
+                    self.ui.viewer.view.addItem(item)
 
 
         self.ui.fileValue.setText(QFileInfo(scene.file).fileName())
