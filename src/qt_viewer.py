@@ -111,6 +111,8 @@ class AnimationViewer(QMainWindow):
         self.updateRecentFilesMenu()
 
         self.ui.nodeList.itemSelectionChanged.connect(self.on_node_selected)
+        self.ui.animList.itemSelectionChanged.connect(self.on_anim_selected)
+        self.ui.animRangeList.itemSelectionChanged.connect(self.on_anim_range_selected)
 
 
     def clear_node_details(self):
@@ -118,6 +120,17 @@ class AnimationViewer(QMainWindow):
         self.ui.vertexCountValue.setText('')
         self.ui.faceCountValue.setText('')
         self.ui.childCountValue.setText('')
+
+    def clear_anim_details(self):
+        self.ui.animNameValue.setText('')
+        self.ui.animArgsValue.setText('')
+
+    def clear_anim_range_details(self):
+        self.ui.animStartValue.setText('')
+        self.ui.animEndValue.setText('')
+        self.ui.animRepeatValue.setText('')
+        self.ui.animUnk1Value.setText('')
+        self.ui.animUnk2Value.setText('')
 
 
     def cleanup_meshes(self):
@@ -167,6 +180,48 @@ class AnimationViewer(QMainWindow):
             self.ui.faceCountValue.setText(str(len(self.selected_node.faces)))
             self.ui.childCountValue.setText(str(len(self.selected_node.children)))
 
+    
+    def on_anim_selected(self):
+        anim = None
+        if len(self.ui.animList.selectedItems())>0:
+            anim = self.ui.animList.selectedItems()[0].data(1)
+        self.ui.animRangeList.clear()
+        self.clear_anim_details()
+        self.clear_anim_range_details()
+        if anim is not None:            
+            self.ui.animNameValue.setText(anim.name)
+
+            args=""
+            deuxcentquatre=0
+            for val in anim.args:
+                if val==204:
+                    deuxcentquatre+=1
+                else:
+                    if deuxcentquatre>0:
+                        args+=" 204("+str(deuxcentquatre)+")" if deuxcentquatre>1 else " 204"
+                        deuxcentquatre=0
+                    args+=" "+str(val)
+            self.ui.animArgsValue.setText(args)
+            
+            for animRange in anim.ranges:
+                animRange_item = QListWidgetItem(str(animRange.start) + " -> " + str(animRange.end) + " ("+str(animRange.repeat)+")")
+                animRange_item.setData(1, animRange)
+                self.ui.animRangeList.addItem(animRange_item)
+            self.ui.animRangeList.setCurrentRow(0)
+    
+    def on_anim_range_selected(self):
+        animRange = None
+        if len(self.ui.animRangeList.selectedItems())>0:
+            animRange = self.ui.animRangeList.selectedItems()[0].data(1)
+
+        self.clear_anim_range_details()
+        if animRange is not None:
+            self.ui.animStartValue.setText(str(animRange.start))
+            self.ui.animEndValue.setText(str(animRange.end))
+            self.ui.animRepeatValue.setText(str(animRange.repeat))
+            self.ui.animUnk1Value.setText(str(animRange.unknown1))
+            self.ui.animUnk2Value.setText(str(animRange.unknown2))
+
 
     def openFile(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "XBF Files (*.xbf)")
@@ -189,12 +244,21 @@ class AnimationViewer(QMainWindow):
         self.ui.nodeList.clear()
         self.cleanup_meshes()
         self.clear_node_details()
+        self.ui.animList.clear()
+        self.ui.animRangeList.clear()
+        self.clear_anim_details()
+        self.clear_anim_range_details()
 
         for node in self.scene.nodes:
             self.find_va_nodes(node)
 
         self.ui.fileValue.setText(QFileInfo(self.scene.file).fileName())
         self.ui.versionValue.setText(str(self.scene.version))
+
+        for anim in self.scene.animations:
+            anim_item = QListWidgetItem(anim.name)
+            anim_item.setData(1, anim)
+            self.ui.animList.addItem(anim_item)
 
         if fileName in self.recent_files:
             self.recent_files.remove(fileName)
