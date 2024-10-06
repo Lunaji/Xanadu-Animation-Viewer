@@ -80,6 +80,7 @@ class AnimationViewer(QMainWindow):
         node_item = QListWidgetItem(node.name)
         if node.vertex_animation:
             node_item.setBackground(QColorConstants.Svg.lightgreen)
+        node_item.setData(1,node)
         self.ui.nodeList.addItem(node_item)
 
         for child in node.children:
@@ -154,15 +155,12 @@ class AnimationViewer(QMainWindow):
 
 
     def on_node_selected(self):
-        item = self.ui.nodeList.selectedItems()[0]
+        self.selected_node = None
+        if len(self.ui.nodeList.selectedItems())>0:
+            self.selected_node = self.ui.nodeList.selectedItems()[0].data(1)
 
-        for node in self.scene.nodes:
-            r = find_node(node, item.text())
-            if r is not None:
-                break
-
-        if r is not None:
-            self.selected_node = r
+        self.clear_node_details()
+        if self.selected_node is not None:
             self.cleanup_meshes()
 
             if self.selected_node.vertex_animation:
