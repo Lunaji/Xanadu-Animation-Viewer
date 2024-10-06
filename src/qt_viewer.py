@@ -38,6 +38,7 @@ class AnimationViewer():
         self.mesh = None
         self.normal_arrows = None
 
+
     def initUI(self):
         self.ui.setGeometry(100, 100, 1280, 720)
 
@@ -63,6 +64,9 @@ class AnimationViewer():
         self.updateRecentFilesMenu()
 
         self.ui.nodeList.itemSelectionChanged.connect(self.on_node_selected)
+        self.ui.animList.itemSelectionChanged.connect(self.on_anim_selected)
+        self.ui.animRangeList.itemSelectionChanged.connect(self.on_anim_range_selected)
+        self.ui.eventList.itemSelectionChanged.connect(self.on_event_selected)
 
 
     def clear_node_details(self):
@@ -71,6 +75,27 @@ class AnimationViewer():
         self.ui.faceCountValue.setText('')
         self.ui.childCountValue.setText('')
 
+    def clear_anim_details(self):
+        self.ui.animNameValue.setText('')
+        self.ui.animArgsValue.setText('')
+
+    def clear_anim_range_details(self):
+        self.ui.animStartValue.setText('')
+        self.ui.animEndValue.setText('')
+        self.ui.animRepeatValue.setText('')
+        self.ui.animUnk1Value.setText('')
+        self.ui.animUnk2Value.setText('')
+
+    def clear_event_details(self):
+        self.ui.eventTypeName.setText('')
+        self.ui.eventTypeValue.setText('')
+        self.ui.eventName1Value.setText('')
+        self.ui.eventName2Value.setText('')
+        self.ui.eventFrameValue.setText('')
+        self.ui.eventIslongValue.setText('')
+        self.ui.eventUnknownValue.setText('')
+        self.ui.eventHeadArgsValue.setText('')
+        self.ui.eventTailArgsValue.setText('')
 
     def cleanup_meshes(self):
         if self.mesh is not None:
@@ -82,15 +107,12 @@ class AnimationViewer():
 
 
     def on_node_selected(self):
-        items = self.ui.nodeList.selectedItems()
-        if not items:
-            return
-        item = items[0]
+        self.selected_node = None
+        if len(self.ui.nodeList.selectedItems())>0:
+            self.selected_node = self.ui.nodeList.selectedItems()[0].data(1)
 
-        r = next((node for node in self.scene if node.name == item.text()), None)
-
-        if r is not None:
-            self.selected_node = r
+        self.clear_node_details()
+        if self.selected_node is not None:
             self.cleanup_meshes()
 
             if self.selected_node.vertex_animation is not None and self.selected_node.vertex_animation.frames is not None:
@@ -119,6 +141,63 @@ class AnimationViewer():
             self.ui.faceCountValue.setText(str(len(self.selected_node.faces)))
             self.ui.childCountValue.setText(str(len(self.selected_node.children)))
 
+    
+    def on_anim_selected(self):
+        anim = None
+        if len(self.ui.animList.selectedItems())>0:
+            anim = self.ui.animList.selectedItems()[0].data(1)
+        self.ui.animRangeList.clear()
+        self.clear_anim_details()
+        self.clear_anim_range_details()
+        if anim is not None:            
+            self.ui.animNameValue.setText(anim.name)
+
+            args=""
+            deuxcentquatre=0
+            for val in anim.args:
+                if val==204:
+                    deuxcentquatre+=1
+                else:
+                    if deuxcentquatre>0:
+                        args+=" 204("+str(deuxcentquatre)+")" if deuxcentquatre>1 else " 204"
+                        deuxcentquatre=0
+                    args+=" "+str(val)
+            self.ui.animArgsValue.setText(args)
+            
+            for animRange in anim.ranges:
+                animRange_item = QListWidgetItem(str(animRange.start) + " -> " + str(animRange.end) + " ("+str(animRange.repeat)+")")
+                animRange_item.setData(1, animRange)
+                self.ui.animRangeList.addItem(animRange_item)
+            self.ui.animRangeList.setCurrentRow(0)
+    
+    def on_anim_range_selected(self):
+        animRange = None
+        if len(self.ui.animRangeList.selectedItems())>0:
+            animRange = self.ui.animRangeList.selectedItems()[0].data(1)
+
+        self.clear_anim_range_details()
+        if animRange is not None:
+            self.ui.animStartValue.setText(str(animRange.start))
+            self.ui.animEndValue.setText(str(animRange.end))
+            self.ui.animRepeatValue.setText(str(animRange.repeat))
+            self.ui.animUnk1Value.setText(str(animRange.unknown1))
+            self.ui.animUnk2Value.setText(str(animRange.unknown2))
+
+    def on_event_selected(self):
+        event = None
+        if len(self.ui.eventList.selectedItems())>0:
+            event = self.ui.eventList.selectedItems()[0].data(1)
+        self.clear_event_details()
+        if event is not None:            
+            self.ui.eventTypeName.setText(event.typename)
+            self.ui.eventTypeValue.setText(str(event.type))
+            self.ui.eventName1Value.setText(event.name1)
+            self.ui.eventName2Value.setText(event.name2)
+            self.ui.eventFrameValue.setText(str(event.frame_index))
+            self.ui.eventIslongValue.setText(str(event.is_long))
+            self.ui.eventUnknownValue.setText(str(event.unknown))
+            self.ui.eventHeadArgsValue.setText(", ".join([str(x) for x in event.head_args]))
+            self.ui.eventTailArgsValue.setText(", ".join([str(x) for x in event.tail_args]))
 
     def openFile(self):
         fileName, _ = QFileDialog.getOpenFileName(self.ui, "Open File", "", "XBF Files (*.xbf)")
@@ -141,15 +220,32 @@ class AnimationViewer():
         self.ui.nodeList.clear()
         self.cleanup_meshes()
         self.clear_node_details()
+        self.ui.animList.clear()
+        self.ui.animRangeList.clear()
+        self.clear_anim_details()
+        self.clear_anim_range_details()
+        self.ui.eventList.clear()
+        self.clear_event_details()
 
         for node in self.scene:
             node_item = QListWidgetItem(node.name)
             if node.vertex_animation:
                 node_item.setBackground(QColorConstants.Svg.lightgreen)
+            node_item.setData(1,node)
             self.ui.nodeList.addItem(node_item)
 
         self.ui.fileValue.setText(QFileInfo(self.scene.file).fileName())
         self.ui.versionValue.setText(str(self.scene.version))
+
+        for anim in self.scene.animations:
+            anim_item = QListWidgetItem(anim.name)
+            anim_item.setData(1, anim)
+            self.ui.animList.addItem(anim_item)
+
+        for event in self.scene.events:
+            event_item = QListWidgetItem(event.typename+" "+event.name1+" "+event.name2)
+            event_item.setData(1, event)
+            self.ui.eventList.addItem(event_item)
 
         if fileName in self.recent_files:
             self.recent_files.remove(fileName)
