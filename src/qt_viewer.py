@@ -33,6 +33,9 @@ def decompose(vertices):
 
     return positions, normals
 
+def has_vertex_animation_frames(node):
+    return node.vertex_animation is not None and node.vertex_animation.frames
+
 def get_mesh(node):
 
     positions,normals = decompose(node.vertices)
@@ -53,7 +56,7 @@ def get_mesh(node):
     )
 
     va_mesh = []
-    if node.vertex_animation is not None and node.vertex_animation.frames:
+    if has_vertex_animation_frames(node):
         for frame in node.vertex_animation.frames:
             frame_positions, frame_normals = decompose(frame)
 
@@ -206,7 +209,7 @@ class AnimationViewer():
 
         mesh = self.gl_items.get(selected_node.name)
         if mesh is not None:
-            if selected_node.vertex_animation is not None and selected_node.vertex_animation.frames:
+            if has_vertex_animation_frames(selected_node):
                 mesh['vertex animation mesh'][0].setVisible(True)
             else:
                 mesh['mesh'].setVisible(True)
@@ -301,7 +304,7 @@ class AnimationViewer():
 
         mesh = self.gl_items.get(selected_node.name)
         if mesh is not None:
-            if selected_node.vertex_animation is not None and selected_node.vertex_animation.frames:
+            if has_vertex_animation_frames(selected_node):
                 self.current_frame = (self.current_frame + 1) % len(selected_node.vertex_animation.frames)
                 for item in self.ui.viewer.view.items:
                     item.setVisible(False)
