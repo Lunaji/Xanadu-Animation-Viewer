@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QAction
 from PySide6.QtCore import (
+    QTimer,
     QSettings,
     qDebug,
     QFileInfo,
@@ -19,12 +20,7 @@ from PySide6.QtCore import (
 import pyqtgraph.opengl as gl
 from PySide6.QtUiTools import QUiLoader
 from xanlib import load_xbf
-from typing import NamedTuple
 
-
-class Mesh(NamedTuple):
-    mesh: gl.GLMeshItem
-    normals: gl.GLLinePlotItem
 
 def decompose(vertices):
     positions = np.array([v.position for v in vertices])
@@ -40,10 +36,11 @@ def decompose(vertices):
 def get_mesh(node):
 
     positions,normals = decompose(node.vertices)
+    faces = np.array([face.vertex_indices for face in node.faces])
 
     mesh = gl.GLMeshItem(
         vertexes=positions,
-        faces=np.array([face.vertex_indices for face in node.faces]),
+        faces=faces,
         drawFaces=False,
         drawEdges=True,
     )
@@ -55,7 +52,23 @@ def get_mesh(node):
         mode='lines'
     )
 
-    return Mesh(mesh, normal_arrows)
+    va_mesh = []
+    if node.vertex_animation is not None and node.vertex_animation.frames:
+        for frame in node.vertex_animation.frames:
+            frame_positions, frame_normals = decompose(frame)
+
+            va_mesh.append(gl.GLMeshItem(
+                    vertexes=frame_positions,
+                    faces=faces,
+                    drawFaces=False,
+                    drawEdges=True,
+                ))
+
+    return {
+        'mesh': mesh,
+        'normals': normal_arrows,
+        'vertex animation mesh': va_mesh
+    }
 
 
 class SceneModel(QAbstractItemModel):
@@ -156,6 +169,12 @@ class AnimationViewer():
         self.ui.actionToggle_Wireframe.triggered.connect(self.toggle_wireframe)
         self.ui.actionToggle_Normals.triggered.connect(self.toggle_normals)
 
+        self.timer = QTimer(self.ui)
+        self.timer.timeout.connect(self.update_frame)
+        self.timer.start(33)
+
+        self.current_frame = 0
+
 
     def toggle_wireframe(self):
         for mesh in filter(lambda item: isinstance(item, gl.GLMeshItem), self.ui.viewer.view.items):
@@ -187,9 +206,12 @@ class AnimationViewer():
 
         mesh = self.gl_items.get(selected_node.name)
         if mesh is not None:
-            mesh['mesh'].setVisible(True)
-            if self.ui.actionToggle_Normals.isChecked():
-                mesh['normals'].setVisible(True)
+            if selected_node.vertex_animation is not None and selected_node.vertex_animation.frames:
+                mesh['vertex animation mesh'][0].setVisible(True)
+            else:
+                mesh['mesh'].setVisible(True)
+                if self.ui.actionToggle_Normals.isChecked():
+                    mesh['normals'].setVisible(True)
 
         self.ui.nodeFlagsValue.setText(str(selected_node.flags))
         self.ui.vertexCountValue.setText(str(len(selected_node.vertices)))
@@ -201,6 +223,10 @@ class AnimationViewer():
         fileName, _ = QFileDialog.getOpenFileName(self.ui, "Open File", "", "XBF Files (*.xbf)")
         if fileName:
             self.loadFile(fileName)
+
+    def load_glItem(self, item):
+        item.setVisible(False)
+        self.ui.viewer.view.addItem(item)
 
     def loadFile(self, fileName):
 
@@ -236,10 +262,13 @@ class AnimationViewer():
         for node in scene:
             if node.vertices:
                 items = get_mesh(node)
-                self.gl_items[node.name] = { 'mesh': items.mesh, 'normals': items.normals }
-                for item in items:
-                    item.setVisible(False)
-                    self.ui.viewer.view.addItem(item)
+                self.gl_items[node.name] = items
+                for value in items.values():
+                    if isinstance(value, list):
+                        for item in value:
+                            self.load_glItem(item)
+                    else:
+                        self.load_glItem(value)
 
 
         self.ui.fileValue.setText(QFileInfo(scene.file).fileName())
@@ -259,6 +288,24 @@ class AnimationViewer():
             action = QAction(fileName, self.ui)
             action.triggered.connect(lambda checked, f=fileName: self.loadFile(f))
             self.ui.recentMenu.addAction(action)
+
+    def update_frame(self):
+        selection_model = self.ui.nodeList.selectionModel()
+        if selection_model is None:
+            return
+        selected_indexes = selection_model.selectedIndexes()
+        if not selected_indexes:
+            return
+
+        selected_node = selected_indexes[0].internalPointer()
+
+        mesh = self.gl_items.get(selected_node.name)
+        if mesh is not None:
+            if selected_node.vertex_animation is not None and selected_node.vertex_animation.frames:
+                self.current_frame = (self.current_frame + 1) % len(selected_node.vertex_animation.frames)
+                for item in self.ui.viewer.view.items:
+                    item.setVisible(False)
+                mesh['vertex animation mesh'][self.current_frame].setVisible(True)
 
 
 if __name__ == '__main__':
