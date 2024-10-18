@@ -206,14 +206,16 @@ class AnimationViewer():
         self.ui.faceCountValue.setText('')
         self.ui.childCountValue.setText('')
 
+    def hide_all(self):
+        for item in self.ui.viewer.view.items:
+            item.setVisible(False)
 
     def on_node_selected(self, selected, deselected):
 
         if not selected.indexes():
             return
 
-        for item in self.ui.viewer.view.items:
-            item.setVisible(False)
+        self.hide_all()
 
         selected_node = selected.indexes()[0].internalPointer()
 
@@ -319,8 +321,7 @@ class AnimationViewer():
         if mesh is not None:
             if has_vertex_animation_frames(selected_node):
                 self.current_frame = (self.current_frame + 1) % len(selected_node.vertex_animation.frames)
-                for item in self.ui.viewer.view.items:
-                    item.setVisible(False)
+                self.hide_all()
                 mesh['vertex animation mesh'][self.current_frame].setVisible(True)
                 if self.ui.actionToggle_Normals.isChecked():
                     mesh['vertex animation normals'][self.current_frame].setVisible(True)
