@@ -56,6 +56,7 @@ def get_mesh(node):
     )
 
     va_mesh = []
+    va_normals = []
     if has_vertex_animation_frames(node):
         for frame in node.vertex_animation.frames:
             frame_positions, frame_normals = decompose(frame)
@@ -67,10 +68,19 @@ def get_mesh(node):
                     drawEdges=True,
                 ))
 
+            va_normals.append(gl.GLLinePlotItem(
+                pos=frame_normals,
+                color=(1, 0, 0, 1),
+                width=2,
+                mode='lines'
+            ))
+
+
     return {
         'mesh': mesh,
         'normals': normal_arrows,
-        'vertex animation mesh': va_mesh
+        'vertex animation mesh': va_mesh,
+        'vertex animation normals': va_normals
     }
 
 
@@ -211,6 +221,8 @@ class AnimationViewer():
         if mesh is not None:
             if has_vertex_animation_frames(selected_node):
                 mesh['vertex animation mesh'][0].setVisible(True)
+                if self.ui.actionToggle_Normals.isChecked():
+                    mesh['vertex animation normals'][0].setVisible(True)
             else:
                 mesh['mesh'].setVisible(True)
                 if self.ui.actionToggle_Normals.isChecked():
@@ -309,6 +321,8 @@ class AnimationViewer():
                 for item in self.ui.viewer.view.items:
                     item.setVisible(False)
                 mesh['vertex animation mesh'][self.current_frame].setVisible(True)
+                if self.ui.actionToggle_Normals.isChecked():
+                    mesh['vertex animation normals'][self.current_frame].setVisible(True)
 
 
 if __name__ == '__main__':
