@@ -217,16 +217,17 @@ class AnimationViewer():
 
         selected_node = selected.indexes()[0].internalPointer()
 
-        mesh = self.gl_items.get(selected_node.name)
-        if mesh is not None:
+        gl_items = self.gl_items.get(selected_node.name)
+        if gl_items is not None:
             if has_vertex_animation_frames(selected_node):
-                mesh['vertex animation mesh'][0].setVisible(True)
-                if self.ui.actionToggle_Normals.isChecked():
-                    mesh['vertex animation normals'][0].setVisible(True)
+                mesh = gl_items['vertex animation mesh'][0]
+                normals = gl_items['vertex animation normals'][0]
             else:
-                mesh['mesh'].setVisible(True)
-                if self.ui.actionToggle_Normals.isChecked():
-                    mesh['normals'].setVisible(True)
+                mesh = gl_items['mesh']
+                normals = gl_items['normals']
+            mesh.setVisible(True)
+            if self.ui.actionToggle_Normals.isChecked():
+                normals.setVisible(True)
 
         self.ui.nodeFlagsValue.setText(str(selected_node.flags))
         self.ui.vertexCountValue.setText(str(len(selected_node.vertices)))
