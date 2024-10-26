@@ -325,7 +325,7 @@ class AnimationViewer():
 
         mesh = self.gl_items.get(selected_node.name)
         if mesh is not None:
-            if has_vertex_animation_frames(selected_node):
+            if has_vertex_animation_frames(selected_node) and self.ui.play_button.isChecked():
                 self.current_frame = (self.current_frame + 1) % len(selected_node.vertex_animation.frames)
                 self.ui.frame_number.display(self.current_frame)
                 self.ui.frame_slider.setValue(self.current_frame)
