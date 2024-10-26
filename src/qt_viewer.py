@@ -161,7 +161,6 @@ class AnimationViewer():
     def __init__(self, ui, state_machine):
         self.ui = ui
         self.state_machine = state_machine
-        self.ui.setGeometry(100, 100, 1280, 720)
 
         self.settings = QSettings('DualNatureStudios', 'AnimationViewer')
         self.recent_files = self.settings.value("recentFiles")
