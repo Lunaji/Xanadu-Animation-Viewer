@@ -47,6 +47,9 @@
         <layout class="QGridLayout" name="gridLayout">
          <item row="0" column="2">
           <widget class="QSlider" name="frame_slider">
+           <property name="maximum">
+            <number>0</number>
+           </property>
            <property name="orientation">
             <enum>Qt::Orientation::Horizontal</enum>
            </property>
