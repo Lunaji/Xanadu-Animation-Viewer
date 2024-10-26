@@ -185,8 +185,16 @@ class AnimationViewer():
         self.ui.actionToggle_Normals.triggered.connect(self.toggle_normals)
 
         self.timer = QTimer(self.ui)
-        self.timer.timeout.connect(self.update_frame)
-        self.timer.start(33)
+        self.timer.timeout.connect(self.timer_out)
+
+        self.ui.play_button.toggled.connect(self.toggle_timer)
+
+
+    def toggle_timer(self, checked):
+        if checked:
+            self.timer.start(33)
+        else:
+            self.timer.stop()
 
 
     def toggle_wireframe(self):
@@ -311,7 +319,13 @@ class AnimationViewer():
             action.triggered.connect(lambda checked, f=fileName: self.loadFile(f))
             self.ui.recentMenu.addAction(action)
 
-    def update_frame(self):
+    def timer_out(self):
+        current_frame = self.ui.frame_slider.value()
+        self.ui.frame_slider.setValue((current_frame+1) % self.ui.frame_slider.maximum())
+        self.update_frame(current_frame)
+
+
+    def update_frame(self, current_frame):
         selection_model = self.ui.nodeList.selectionModel()
         if selection_model is None:
             return
@@ -324,8 +338,6 @@ class AnimationViewer():
         mesh = self.gl_items.get(selected_node.name)
         if mesh is not None:
             if has_vertex_animation_frames(selected_node) and self.ui.play_button.isChecked():
-                current_frame = (self.ui.frame_slider.value() + 1) % len(selected_node.vertex_animation.frames)
-                self.ui.frame_slider.setValue(current_frame)
                 self.hide_all()
                 mesh['vertex animation mesh'][current_frame].setVisible(True)
                 if self.ui.actionToggle_Normals.isChecked():
