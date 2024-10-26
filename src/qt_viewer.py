@@ -1,4 +1,6 @@
 import sys
+import argparse
+from pathlib import Path
 import numpy as np
 from PySide6.QtWidgets import (
     QApplication,
@@ -251,7 +253,7 @@ class AnimationViewer():
         try:
             scene = load_xbf(fileName)
         except Exception as e:
-            error_dialog = QMessageBox(self)
+            error_dialog = QMessageBox(self.ui)
             error_dialog.setIcon(QMessageBox.Critical)
             error_dialog.setWindowTitle("File Loading Error")
             error_dialog.setText('Invalid XBF file')
@@ -328,9 +330,19 @@ class AnimationViewer():
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Xanadu Viewer')
+    parser.add_argument('file', nargs='?', help='File to open')
+    args, qt_args = parser.parse_known_args()
+
     loader = QUiLoader()
-    app = QApplication(sys.argv)
-    ui = loader.load('form.ui')
+    app = QApplication(qt_args)
+
+    script_dir = Path(__file__).resolve().parent
+    ui = loader.load(script_dir / 'form.ui')
+
     viewer = AnimationViewer(ui)
+    if args.file is not None:
+        viewer.loadFile(args.file)
     viewer.ui.show()
+
     sys.exit(app.exec())
