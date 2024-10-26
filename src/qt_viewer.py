@@ -186,8 +186,8 @@ class AnimationViewer():
 
         self.timer = QTimer(self.ui)
         self.timer.timeout.connect(self.timer_out)
-
         self.ui.play_button.toggled.connect(self.toggle_timer)
+        self.ui.frame_slider.valueChanged.connect(self.update_frame)
 
 
     def toggle_timer(self, checked):
@@ -322,7 +322,6 @@ class AnimationViewer():
     def timer_out(self):
         current_frame = self.ui.frame_slider.value()
         self.ui.frame_slider.setValue((current_frame+1) % self.ui.frame_slider.maximum())
-        self.update_frame(current_frame)
 
 
     def update_frame(self, current_frame):
@@ -337,7 +336,7 @@ class AnimationViewer():
 
         mesh = self.gl_items.get(selected_node.name)
         if mesh is not None:
-            if has_vertex_animation_frames(selected_node) and self.ui.play_button.isChecked():
+            if has_vertex_animation_frames(selected_node):
                 self.hide_all()
                 mesh['vertex animation mesh'][current_frame].setVisible(True)
                 if self.ui.actionToggle_Normals.isChecked():
