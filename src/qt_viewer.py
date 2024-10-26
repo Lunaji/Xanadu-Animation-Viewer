@@ -240,7 +240,7 @@ class AnimationViewer():
                 mesh = gl_items['vertex animation mesh'][0]
                 normals = gl_items['vertex animation normals'][0]
                 self.ui.play_button.setEnabled(True)
-                self.ui.frame_slider.setMaximum(len(selected_node.vertex_animation.frames))
+                self.ui.frame_slider.setMaximum(len(selected_node.vertex_animation.frames)-1)
             else:
                 mesh = gl_items['mesh']
                 normals = gl_items['normals']
