@@ -297,5 +297,21 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>frame_slider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>frame_number</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>505</x>
+     <y>656</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>139</x>
+     <y>656</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
 </ui>
