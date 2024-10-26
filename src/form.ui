@@ -71,6 +71,22 @@
          <item row="0" column="1">
           <widget class="QLCDNumber" name="frame_number"/>
          </item>
+         <item row="1" column="0">
+          <widget class="QSpinBox" name="fps_box">
+           <property name="suffix">
+            <string>fps</string>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>144</number>
+           </property>
+           <property name="value">
+            <number>30</number>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>

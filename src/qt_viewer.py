@@ -189,10 +189,12 @@ class AnimationViewer():
         self.ui.play_button.toggled.connect(self.toggle_timer)
         self.ui.frame_slider.valueChanged.connect(self.update_frame)
 
+        self.ui.fps_box.valueChanged.connect(lambda fps: self.timer.setInterval(1000 // fps))
+
 
     def toggle_timer(self, checked):
         if checked:
-            self.timer.start(33)
+            self.timer.start(1000 // self.ui.fps_box.value())
         else:
             self.timer.stop()
 
