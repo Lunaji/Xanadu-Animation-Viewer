@@ -226,9 +226,11 @@ class AnimationViewer():
             if has_vertex_animation_frames(selected_node):
                 mesh = gl_items['vertex animation mesh'][0]
                 normals = gl_items['vertex animation normals'][0]
+                self.ui.play_button.setEnabled(True)
             else:
                 mesh = gl_items['mesh']
                 normals = gl_items['normals']
+                self.ui.play_button.setEnabled(False)
             mesh.setVisible(True)
             if self.ui.actionToggle_Normals.isChecked():
                 normals.setVisible(True)
