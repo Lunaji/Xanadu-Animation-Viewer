@@ -227,10 +227,12 @@ class AnimationViewer():
                 mesh = gl_items['vertex animation mesh'][0]
                 normals = gl_items['vertex animation normals'][0]
                 self.ui.play_button.setEnabled(True)
+                self.ui.frame_slider.setMaximum(len(selected_node.vertex_animation.frames))
             else:
                 mesh = gl_items['mesh']
                 normals = gl_items['normals']
                 self.ui.play_button.setEnabled(False)
+                self.ui.frame_slider.setMaximum(0)
             mesh.setVisible(True)
             if self.ui.actionToggle_Normals.isChecked():
                 normals.setVisible(True)
@@ -325,6 +327,8 @@ class AnimationViewer():
         if mesh is not None:
             if has_vertex_animation_frames(selected_node):
                 self.current_frame = (self.current_frame + 1) % len(selected_node.vertex_animation.frames)
+                self.ui.frame_number.display(self.current_frame)
+                self.ui.frame_slider.setValue(self.current_frame)
                 self.hide_all()
                 mesh['vertex animation mesh'][self.current_frame].setVisible(True)
                 if self.ui.actionToggle_Normals.isChecked():
