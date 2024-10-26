@@ -45,29 +45,28 @@
          <string>Animation Controls</string>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <item row="0" column="0">
-          <widget class="QPushButton" name="play_button">
-           <property name="text">
-            <string>Play</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QPushButton" name="stop_button">
-           <property name="text">
-            <string>Stop</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="2">
-          <widget class="QLCDNumber" name="frame_number"/>
-         </item>
-         <item row="0" column="3">
           <widget class="QSlider" name="frame_slider">
            <property name="orientation">
             <enum>Qt::Orientation::Horizontal</enum>
            </property>
           </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QPushButton" name="play_button">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Play</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLCDNumber" name="frame_number"/>
          </item>
         </layout>
        </widget>
