@@ -21,6 +21,7 @@ from PySide6.QtCore import (
 )
 import pyqtgraph.opengl as gl
 from PySide6.QtUiTools import QUiLoader
+from PySide6.QtScxml import QScxmlStateMachine
 from xanlib import load_xbf
 
 
@@ -157,15 +158,15 @@ class SceneModel(QAbstractItemModel):
 
 
 class AnimationViewer():
-    def __init__(self, ui):
+    def __init__(self, ui, state_machine):
         self.ui = ui
+        self.state_machine = state_machine
         self.ui.setGeometry(100, 100, 1280, 720)
 
         self.settings = QSettings('DualNatureStudios', 'AnimationViewer')
         self.recent_files = self.settings.value("recentFiles")
         if self.recent_files is None:
             self.recent_files = []
-
 
         self.gl_items = {}
 
@@ -339,8 +340,9 @@ if __name__ == '__main__':
 
     script_dir = Path(__file__).resolve().parent
     ui = loader.load(script_dir / 'form.ui')
+    state_machine = QScxmlStateMachine.fromFile(str(script_dir / 'animation_state_machine.scxml'))
 
-    viewer = AnimationViewer(ui)
+    viewer = AnimationViewer(ui, state_machine)
     if args.file is not None:
         viewer.loadFile(args.file)
     viewer.ui.show()
