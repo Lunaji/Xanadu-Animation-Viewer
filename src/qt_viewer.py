@@ -207,6 +207,11 @@ class AnimationViewer():
             if self.gl_items[key]['mesh'].visible():
                 normals = self.gl_items[key]['normals']
                 normals.setVisible(not normals.visible())
+            for i, va_mesh in enumerate(self.gl_items[key]['vertex animation mesh']):
+                if va_mesh.visible():
+                    normals = self.gl_items[key]['vertex animation normals'][i]
+                    normals.setVisible(not normals.visible())
+
 
     def clear_node_details(self):
         self.ui.nodeFlagsValue.setText('')
