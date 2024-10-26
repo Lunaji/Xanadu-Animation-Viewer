@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" name="animation_state_machine.scxml" qt:editorversion="14.0.2" initial="Idle">
+    <state id="Idle">
+        <qt:editorinfo geometry="274.05;181.34;-60;-50;120;100" scenegeometry="274.05;181.34;214.05;131.34;120;100"/>
+    </state>
+    <state id="Playing">
+        <qt:editorinfo geometry="645.91;258.77;-60;-50;120;100" scenegeometry="645.91;258.77;585.91;208.77;120;100"/>
+    </state>
+    <state id="Paused">
+        <qt:editorinfo geometry="448.27;461.51;-60;-50;120;100" scenegeometry="448.27;461.51;388.27;411.51;120;100"/>
+    </state>
+</scxml>
