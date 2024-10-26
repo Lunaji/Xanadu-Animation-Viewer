@@ -188,8 +188,6 @@ class AnimationViewer():
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(33)
 
-        self.current_frame = 0
-
 
     def toggle_wireframe(self):
         for mesh in filter(lambda item: isinstance(item, gl.GLMeshItem), self.ui.viewer.view.items):
@@ -326,12 +324,12 @@ class AnimationViewer():
         mesh = self.gl_items.get(selected_node.name)
         if mesh is not None:
             if has_vertex_animation_frames(selected_node) and self.ui.play_button.isChecked():
-                self.current_frame = (self.current_frame + 1) % len(selected_node.vertex_animation.frames)
-                self.ui.frame_slider.setValue(self.current_frame)
+                current_frame = (self.ui.frame_slider.value() + 1) % len(selected_node.vertex_animation.frames)
+                self.ui.frame_slider.setValue(current_frame)
                 self.hide_all()
-                mesh['vertex animation mesh'][self.current_frame].setVisible(True)
+                mesh['vertex animation mesh'][current_frame].setVisible(True)
                 if self.ui.actionToggle_Normals.isChecked():
-                    mesh['vertex animation normals'][self.current_frame].setVisible(True)
+                    mesh['vertex animation normals'][current_frame].setVisible(True)
 
 
 if __name__ == '__main__':
