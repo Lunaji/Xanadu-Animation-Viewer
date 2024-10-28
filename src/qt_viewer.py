@@ -11,6 +11,9 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QAction
 from PySide6.QtCore import (
+    QObject,
+    SLOT,
+    Slot,
     QTimer,
     QSettings,
     qDebug,
@@ -157,10 +160,11 @@ class SceneModel(QAbstractItemModel):
         return None
 
 
-class AnimationViewer():
+class AnimationViewer(QObject):
     def __init__(self, ui, state_machine):
+        super().__init__()
+
         self.ui = ui
-        self.state_machine = state_machine
 
         self.settings = QSettings('DualNatureStudios', 'AnimationViewer')
         self.recent_files = self.settings.value("recentFiles")
@@ -191,13 +195,32 @@ class AnimationViewer():
 
         self.ui.fps_box.valueChanged.connect(lambda fps: self.timer.setInterval(1000 // fps))
 
+        self.state_machine = state_machine
+        self.state_machine.connectToEvent('stop_animation', self, SLOT('stop_animation()'))
+        self.state_machine.init()
+        self.state_machine.start()
+
+        self.ui.play_button.toggled.connect(self.on_play_button_toggled)
+
+
+    @Slot(bool)
+    def on_play_button_toggled(self, checked):
+        if checked:
+            self.state_machine.submitEvent('play')
+        else:
+            self.state_machine.submitEvent('pause')
+
+    @Slot()
+    def stop_animation(self):
+        self.ui.play_button.setEnabled(False)
+        self.ui.play_button.setChecked(False)
+        self.ui.frame_slider.setMaximum(0)
 
     def toggle_timer(self, checked):
         if checked:
             self.timer.start(1000 // self.ui.fps_box.value())
         else:
             self.timer.stop()
-
 
     def toggle_wireframe(self):
         for mesh in filter(lambda item: isinstance(item, gl.GLMeshItem), self.ui.viewer.view.items):
@@ -241,11 +264,11 @@ class AnimationViewer():
                 normals = gl_items['vertex animation normals'][0]
                 self.ui.play_button.setEnabled(True)
                 self.ui.frame_slider.setMaximum(len(selected_node.vertex_animation.frames)-1)
+                self.state_machine.submitEvent('enable_play')
             else:
                 mesh = gl_items['mesh']
                 normals = gl_items['normals']
-                self.ui.play_button.setEnabled(False)
-                self.ui.frame_slider.setMaximum(0)
+                self.state_machine.submitEvent('stop')
             mesh.setVisible(True)
             if self.ui.actionToggle_Normals.isChecked():
                 normals.setVisible(True)
