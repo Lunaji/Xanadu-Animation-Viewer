@@ -4,7 +4,7 @@ Requires [xanlib](https://github.com/Lunaji/xanlib).
 
 ## Usage
 Loading a XBF file will show a list of its nodes on the side panel.  
-Clickig on a node will display its mesh in the viewer.  
-If it has a vertex animation, it will play automatically.
+Clicking on a node will display its mesh in the viewer.  
+If it has vertex animation frames, it is possible to play through them.
 
-![ordos_campaign](https://github.com/user-attachments/assets/a533f529-297c-4c0e-ae51-51f80484075e)
+![mgt_animation_ctrl_fps](https://github.com/user-attachments/assets/3d71ca94-2eaa-4850-9af2-de310dbd7135)
