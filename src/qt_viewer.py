@@ -197,6 +197,7 @@ class AnimationViewer(QObject):
 
         self.state_machine = state_machine
         self.state_machine.connectToEvent('stop_animation', self, SLOT('stop_animation()'))
+        self.state_machine.connectToEvent('enable_play', self, SLOT('on_enable_play()'))
         self.state_machine.init()
         self.state_machine.start()
 
@@ -209,6 +210,10 @@ class AnimationViewer(QObject):
             self.state_machine.submitEvent('play')
         else:
             self.state_machine.submitEvent('pause')
+
+    @Slot()
+    def on_enable_play(self):
+        self.ui.play_button.setEnabled(True)
 
     @Slot()
     def stop_animation(self):
@@ -262,7 +267,6 @@ class AnimationViewer(QObject):
             if has_vertex_animation_frames(selected_node):
                 mesh = gl_items['vertex animation mesh'][0]
                 normals = gl_items['vertex animation normals'][0]
-                self.ui.play_button.setEnabled(True)
                 self.ui.frame_slider.setMaximum(len(selected_node.vertex_animation.frames)-1)
                 self.state_machine.submitEvent('enable_play')
             else:
