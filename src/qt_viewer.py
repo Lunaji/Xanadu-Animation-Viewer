@@ -196,7 +196,7 @@ class AnimationViewer(QObject):
         self.ui.fps_box.valueChanged.connect(lambda fps: self.timer.setInterval(1000 // fps))
 
         self.state_machine = state_machine
-        self.state_machine.connectToEvent('stop_animation', self, SLOT('stop_animation()'))
+        self.state_machine.connectToEvent('stop', self, SLOT('stop_animation()'))
         self.state_machine.connectToEvent('enable_play', self, SLOT('on_enable_play()'))
         self.state_machine.init()
         self.state_machine.start()
