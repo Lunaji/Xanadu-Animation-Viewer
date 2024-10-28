@@ -312,7 +312,7 @@ class AnimationViewer(QObject):
         self.gl_items = {}
         self.clear_node_details()
 
-
+        self.state_machine.submitEvent('stop')
 
         self.scene_model = SceneModel(scene)
         ui.nodeList.setModel(self.scene_model)
