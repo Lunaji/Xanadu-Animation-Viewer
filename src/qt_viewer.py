@@ -190,7 +190,6 @@ class AnimationViewer(QObject):
 
         self.timer = QTimer(self.ui)
         self.timer.timeout.connect(self.timer_out)
-        self.ui.play_button.toggled.connect(self.toggle_timer)
         self.ui.frame_slider.valueChanged.connect(self.update_frame)
 
         self.ui.fps_box.valueChanged.connect(lambda fps: self.timer.setInterval(1000 // fps))
@@ -198,6 +197,8 @@ class AnimationViewer(QObject):
         self.state_machine = state_machine
         self.state_machine.connectToEvent('stop', self, SLOT('stop_animation()'))
         self.state_machine.connectToEvent('enable_play', self, SLOT('on_enable_play()'))
+        self.state_machine.connectToEvent('play', self, SLOT('on_play()'))
+        self.state_machine.connectToEvent('pause', self, SLOT('on_pause()'))
         self.state_machine.init()
         self.state_machine.start()
 
@@ -216,16 +217,18 @@ class AnimationViewer(QObject):
         self.ui.play_button.setEnabled(True)
 
     @Slot()
+    def on_play(self):
+        self.timer.start(1000 // self.ui.fps_box.value())
+
+    @Slot()
+    def on_pause(self):
+        self.timer.stop()
+
+    @Slot()
     def stop_animation(self):
         self.ui.play_button.setEnabled(False)
         self.ui.play_button.setChecked(False)
         self.ui.frame_slider.setMaximum(0)
-
-    def toggle_timer(self, checked):
-        if checked:
-            self.timer.start(1000 // self.ui.fps_box.value())
-        else:
-            self.timer.stop()
 
     def toggle_wireframe(self):
         for mesh in filter(lambda item: isinstance(item, gl.GLMeshItem), self.ui.viewer.view.items):
@@ -356,7 +359,6 @@ class AnimationViewer(QObject):
     def timer_out(self):
         current_frame = self.ui.frame_slider.value()
         self.ui.frame_slider.setValue((current_frame+1) % self.ui.frame_slider.maximum())
-
 
     def update_frame(self, current_frame):
         selection_model = self.ui.nodeList.selectionModel()
