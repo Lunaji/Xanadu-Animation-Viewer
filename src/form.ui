@@ -63,6 +63,9 @@
            <property name="text">
             <string>Play</string>
            </property>
+           <property name="shortcut">
+            <string>Space</string>
+           </property>
            <property name="checkable">
             <bool>true</bool>
            </property>
@@ -276,6 +279,9 @@
    <property name="text">
     <string>Toggle Wireframe</string>
    </property>
+   <property name="shortcut">
+    <string>F</string>
+   </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::NoRole</enum>
    </property>
@@ -289,6 +295,9 @@
    </property>
    <property name="text">
     <string>Toggle Normals</string>
+   </property>
+   <property name="shortcut">
+    <string>N</string>
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::NoRole</enum>
