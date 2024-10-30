@@ -14,10 +14,13 @@ from PySide6.QtWidgets import (
     QFileDialog,
     QMessageBox,
     QHeaderView,
+    QListWidgetItem,
 )
+from PySide6.QtCore import Qt
 import numpy as np
 from xanlib import load_xbf
 from xanviewer.scene_model import SceneModel
+from xanviewer.fxdata_parser import parse_animations
 
 
 def has_vertex_animation_frames(node):
@@ -258,6 +261,12 @@ class AnimationViewer(QObject):
                     else:
                         self.load_glItem(value)
 
+
+        animations = parse_animations(scene.FXData)
+        for animation in animations:
+            animation_item = QListWidgetItem(animation.name)
+            animation_item.setData(Qt.UserRole, animation)
+            self.ui.animationsList.addItem(animation_item)
 
         self.ui.fileValue.setText(QFileInfo(scene.file).fileName())
         self.ui.versionValue.setText(str(scene.version))
