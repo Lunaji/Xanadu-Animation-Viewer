@@ -20,9 +20,9 @@ def main():
     state_machine = QScxmlStateMachine.fromFile(str(script_dir / 'animation_state_machine.scxml'))
 
     viewer = AnimationViewer(ui, state_machine)
+    viewer.ui.show()
     if args.file is not None:
         viewer.loadFile(args.file)
-    viewer.ui.show()
 
     sys.exit(app.exec())
 
