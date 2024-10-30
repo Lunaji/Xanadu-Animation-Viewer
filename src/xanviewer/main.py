@@ -4,6 +4,7 @@ from pathlib import Path
 from PySide6.QtWidgets import QApplication
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtScxml import QScxmlStateMachine
+from PySide6.QtGui import QIcon
 from xanviewer.animation_viewer import AnimationViewer
 
 
@@ -12,10 +13,12 @@ def main():
     parser.add_argument('file', nargs='?', help='File to open')
     args, qt_args = parser.parse_known_args()
 
+    script_dir = Path(__file__).resolve().parent
+
     loader = QUiLoader()
     app = QApplication(qt_args)
+    app.setWindowIcon(QIcon(str(script_dir / 'assets/xanadu_icon.png')))
 
-    script_dir = Path(__file__).resolve().parent
     ui = loader.load(script_dir / 'form.ui')
     state_machine = QScxmlStateMachine.fromFile(str(script_dir / 'animation_state_machine.scxml'))
 
