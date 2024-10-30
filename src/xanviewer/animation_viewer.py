@@ -14,10 +14,13 @@ from PySide6.QtWidgets import (
     QFileDialog,
     QMessageBox,
     QHeaderView,
+    QListWidgetItem,
 )
+from PySide6.QtCore import Qt
 import numpy as np
 from xanlib import load_xbf
 from xanviewer.scene_model import SceneModel
+from xanviewer.fxdata_parser import parse_animations
 
 
 def has_vertex_animation_frames(node):
@@ -125,6 +128,8 @@ class AnimationViewer(QObject):
 
         self.ui.play_button.toggled.connect(self.on_play_button_toggled)
 
+        self.ui.animationsList.currentItemChanged.connect(self.on_animation_selected)
+
 
     @Slot(bool)
     def on_play_button_toggled(self, checked):
@@ -150,6 +155,15 @@ class AnimationViewer(QObject):
         self.ui.play_button.setEnabled(False)
         self.ui.play_button.setChecked(False)
         self.ui.frame_slider.setMaximum(0)
+
+    @Slot(QListWidgetItem, QListWidgetItem)
+    def on_animation_selected(self, current, previous):
+        self.ui.segmentsList.clear()
+        if current is None:
+            return
+        animation = current.data(Qt.UserRole)
+        for segment in animation.segments:
+            self.ui.segmentsList.addItem(str(segment))
 
     def toggle_wireframe(self):
         for mesh in filter(lambda item: isinstance(item, gl.GLMeshItem), self.ui.viewer.view.items):
@@ -232,6 +246,8 @@ class AnimationViewer(QObject):
         self.ui.viewer.view.clear() # reset() ?
         self.gl_items = {}
         self.clear_node_details()
+        self.ui.animationsList.clear()
+        self.ui.segmentsList.clear()
 
         self.state_machine.submitEvent('stop')
 
@@ -258,6 +274,12 @@ class AnimationViewer(QObject):
                     else:
                         self.load_glItem(value)
 
+
+        animations = parse_animations(scene.FXData)
+        for animation in animations:
+            animation_item = QListWidgetItem(animation.name)
+            animation_item.setData(Qt.UserRole, animation)
+            self.ui.animationsList.addItem(animation_item)
 
         self.ui.fileValue.setText(QFileInfo(scene.file).fileName())
         self.ui.versionValue.setText(str(scene.version))
