@@ -1,4 +1,6 @@
 # Xanadu Animation Viewer
+[![PyPI](https://img.shields.io/pypi/v/xanviewer.svg)](https://pypi.org/project/xanviewer)
+
 A viewer for XBF files as found in the game *Emperor: Battle for Dune*.  
 Requires [xanlib](https://github.com/Lunaji/xanlib).
 
