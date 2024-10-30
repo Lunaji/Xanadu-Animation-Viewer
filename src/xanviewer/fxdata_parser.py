@@ -81,6 +81,9 @@ class AnimationSegment:
     repeat: int
     unknown: int
 
+    def __str__(self):
+        return f'Frames {self.start} to {self.end}, Repeat {self.repeat}'
+
 @dataclass
 class Animation:
     name: str

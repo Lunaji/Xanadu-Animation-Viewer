@@ -128,6 +128,8 @@ class AnimationViewer(QObject):
 
         self.ui.play_button.toggled.connect(self.on_play_button_toggled)
 
+        self.ui.animationsList.currentItemChanged.connect(self.on_animation_selected)
+
 
     @Slot(bool)
     def on_play_button_toggled(self, checked):
@@ -153,6 +155,15 @@ class AnimationViewer(QObject):
         self.ui.play_button.setEnabled(False)
         self.ui.play_button.setChecked(False)
         self.ui.frame_slider.setMaximum(0)
+
+    @Slot(QListWidgetItem, QListWidgetItem)
+    def on_animation_selected(self, current, previous):
+        self.ui.segmentsList.clear()
+        if current is None:
+            return
+        animation = current.data(Qt.UserRole)
+        for segment in animation.segments:
+            self.ui.segmentsList.addItem(str(segment))
 
     def toggle_wireframe(self):
         for mesh in filter(lambda item: isinstance(item, gl.GLMeshItem), self.ui.viewer.view.items):
@@ -235,6 +246,8 @@ class AnimationViewer(QObject):
         self.ui.viewer.view.clear() # reset() ?
         self.gl_items = {}
         self.clear_node_details()
+        self.ui.animationsList.clear()
+        self.ui.segmentsList.clear()
 
         self.state_machine.submitEvent('stop')
 
