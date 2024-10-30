@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
 )
 import numpy as np
 from xanlib import load_xbf
-from scene_model import SceneModel
+from xanviewer.scene_model import SceneModel
 
 
 def has_vertex_animation_frames(node):

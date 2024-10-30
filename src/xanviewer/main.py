@@ -4,10 +4,10 @@ from pathlib import Path
 from PySide6.QtWidgets import QApplication
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtScxml import QScxmlStateMachine
-from animation_viewer import AnimationViewer
+from xanviewer.animation_viewer import AnimationViewer
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description='Xanadu Viewer')
     parser.add_argument('file', nargs='?', help='File to open')
     args, qt_args = parser.parse_known_args()
@@ -25,3 +25,7 @@ if __name__ == '__main__':
     viewer.ui.show()
 
     sys.exit(app.exec())
+
+
+if __name__ == '__main__':
+    main()

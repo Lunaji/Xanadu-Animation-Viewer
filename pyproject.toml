@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "xanviewer"
+version = "0.1.0"
+description = "A viewer for XBF files as found in the game Emperor: Battle for Dune."
+authors = ["Lunaji <lunacyjay@gmail.com>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+packages = [{include = "xanviewer", from = "src"}]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.14"
+PySide6 = ">=6.8.0.2"
+pyqtgraph = ">=0.13.7"
+PyOpenGL = ">=3.1.7"
+numpy = ">=2.1.2"
+xanlib = ">=0.1.0"
+
+[tool.poetry.scripts]
+xanviewer = "xanviewer.main:main"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
