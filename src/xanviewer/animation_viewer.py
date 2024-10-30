@@ -91,9 +91,7 @@ class AnimationViewer(QObject):
         self.ui = ui
 
         self.settings = QSettings('DualNatureStudios', 'AnimationViewer')
-        self.recent_files = self.settings.value("recentFiles")
-        if self.recent_files is None:
-            self.recent_files = []
+        self.recent_files = self.settings.value("recentFiles") or []
 
         self.gl_items = {}
 
