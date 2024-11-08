@@ -114,7 +114,7 @@ def parse_animations(fxdata):
     animations = []
 
     for animation_name in animation_names:
-        offset = fxdata.find(animation_name.encode('ascii')+b'\x00')
+        offset = fxdata.rfind(animation_name.encode('ascii')+b'\x00')
         if offset == -1:
             continue
         animations.append(Animation.frombytes(fxdata[offset:]))
