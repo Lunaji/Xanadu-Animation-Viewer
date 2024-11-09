@@ -260,9 +260,8 @@ class AnimationViewer(QObject):
         for row in range(self.scene_model.rowCount()):
             index = self.scene_model.index(row, 0)
             self.ui.nodeList.setExpanded(index, True)
-        self.ui.nodeList.header().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.ui.nodeList.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        self.ui.nodeList.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        for i in range(1, 7):
+            self.ui.nodeList.header().setSectionResizeMode(i, QHeaderView.ResizeToContents)
 
         for node in scene:
             if node.vertices:
