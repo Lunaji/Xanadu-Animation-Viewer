@@ -26,19 +26,21 @@ from xanviewer.fxdata_parser import parse_animations
 def has_vertex_animation_frames(node):
     return node.vertex_animation is not None and node.vertex_animation.frames
 
+
 def decompose(vertices):
     positions = np.array([v.position for v in vertices])
 
     norm_scale = 100
-    norm_ends = positions + norm_scale*np.array([v.normal for v in vertices])
-    normals = np.empty((len(vertices)*2,3))
+    norm_ends = positions + norm_scale * np.array([v.normal for v in vertices])
+    normals = np.empty((len(vertices) * 2, 3))
     normals[0::2] = positions
     normals[1::2] = norm_ends
 
     return positions, normals
 
+
 def get_mesh(node):
-    positions,normals = decompose(node.vertices)
+    positions, normals = decompose(node.vertices)
     faces = np.array([face.vertex_indices for face in node.faces])
 
     mesh = gl.GLMeshItem(
@@ -49,10 +51,7 @@ def get_mesh(node):
     )
 
     normal_arrows = gl.GLLinePlotItem(
-        pos=normals,
-        color=(1, 0, 0, 1),
-        width=2,
-        mode='lines'
+        pos=normals, color=(1, 0, 0, 1), width=2, mode="lines"
     )
 
     va_mesh = []
@@ -61,26 +60,26 @@ def get_mesh(node):
         for frame in node.vertex_animation.frames:
             frame_positions, frame_normals = decompose(frame)
 
-            va_mesh.append(gl.GLMeshItem(
+            va_mesh.append(
+                gl.GLMeshItem(
                     vertexes=frame_positions,
                     faces=faces,
                     drawFaces=False,
                     drawEdges=True,
-                ))
+                )
+            )
 
-            va_normals.append(gl.GLLinePlotItem(
-                pos=frame_normals,
-                color=(1, 0, 0, 1),
-                width=2,
-                mode='lines'
-            ))
-
+            va_normals.append(
+                gl.GLLinePlotItem(
+                    pos=frame_normals, color=(1, 0, 0, 1), width=2, mode="lines"
+                )
+            )
 
     return {
-        'mesh': mesh,
-        'normals': normal_arrows,
-        'vertex animation mesh': va_mesh,
-        'vertex animation normals': va_normals
+        "mesh": mesh,
+        "normals": normal_arrows,
+        "vertex animation mesh": va_mesh,
+        "vertex animation normals": va_normals,
     }
 
 
@@ -90,7 +89,7 @@ class AnimationViewer(QObject):
 
         self.ui = ui
 
-        self.settings = QSettings('DualNatureStudios', 'AnimationViewer')
+        self.settings = QSettings("DualNatureStudios", "AnimationViewer")
         self.recent_files = self.settings.value("recentFiles") or []
 
         self.gl_items = {}
@@ -99,9 +98,7 @@ class AnimationViewer(QObject):
         self.ui.viewer.layout = QVBoxLayout(self.ui.viewer)
         self.ui.viewer.layout.addWidget(self.ui.viewer.view)
         self.ui.viewer.view.setCameraPosition(
-            distance=100000,
-            elevation = 300,
-            azimuth = 90
+            distance=100000, elevation=300, azimuth=90
         )
 
         self.ui.action_Open.triggered.connect(self.openFile)
@@ -114,13 +111,15 @@ class AnimationViewer(QObject):
         self.timer.timeout.connect(self.timer_out)
         self.ui.frame_slider.valueChanged.connect(self.update_frame)
 
-        self.ui.fps_box.valueChanged.connect(lambda fps: self.timer.setInterval(1000 // fps))
+        self.ui.fps_box.valueChanged.connect(
+            lambda fps: self.timer.setInterval(1000 // fps)
+        )
 
         self.state_machine = state_machine
-        self.state_machine.connectToEvent('stop', self, SLOT('stop_animation()'))
-        self.state_machine.connectToEvent('enable_play', self, SLOT('on_enable_play()'))
-        self.state_machine.connectToEvent('play', self, SLOT('on_play()'))
-        self.state_machine.connectToEvent('pause', self, SLOT('on_pause()'))
+        self.state_machine.connectToEvent("stop", self, SLOT("stop_animation()"))
+        self.state_machine.connectToEvent("enable_play", self, SLOT("on_enable_play()"))
+        self.state_machine.connectToEvent("play", self, SLOT("on_play()"))
+        self.state_machine.connectToEvent("pause", self, SLOT("on_pause()"))
         self.state_machine.init()
         self.state_machine.start()
 
@@ -128,13 +127,12 @@ class AnimationViewer(QObject):
 
         self.ui.animationsList.currentItemChanged.connect(self.on_animation_selected)
 
-
     @Slot(bool)
     def on_play_button_toggled(self, checked):
         if checked:
-            self.state_machine.submitEvent('play')
+            self.state_machine.submitEvent("play")
         else:
-            self.state_machine.submitEvent('pause')
+            self.state_machine.submitEvent("pause")
 
     @Slot()
     def on_enable_play(self):
@@ -164,26 +162,27 @@ class AnimationViewer(QObject):
             self.ui.segmentsList.addItem(str(segment))
 
     def toggle_wireframe(self):
-        for mesh in filter(lambda item: isinstance(item, gl.GLMeshItem), self.ui.viewer.view.items):
-            mesh.opts['drawFaces'] = not mesh.opts['drawFaces']
+        for mesh in filter(
+            lambda item: isinstance(item, gl.GLMeshItem), self.ui.viewer.view.items
+        ):
+            mesh.opts["drawFaces"] = not mesh.opts["drawFaces"]
         self.ui.viewer.view.update()
 
     def toggle_normals(self):
         for key in self.gl_items:
-            if self.gl_items[key]['mesh'].visible():
-                normals = self.gl_items[key]['normals']
+            if self.gl_items[key]["mesh"].visible():
+                normals = self.gl_items[key]["normals"]
                 normals.setVisible(not normals.visible())
-            for i, va_mesh in enumerate(self.gl_items[key]['vertex animation mesh']):
+            for i, va_mesh in enumerate(self.gl_items[key]["vertex animation mesh"]):
                 if va_mesh.visible():
-                    normals = self.gl_items[key]['vertex animation normals'][i]
+                    normals = self.gl_items[key]["vertex animation normals"][i]
                     normals.setVisible(not normals.visible())
 
-
     def clear_node_details(self):
-        self.ui.nodeFlagsValue.setText('')
-        self.ui.vertexCountValue.setText('')
-        self.ui.faceCountValue.setText('')
-        self.ui.childCountValue.setText('')
+        self.ui.nodeFlagsValue.setText("")
+        self.ui.vertexCountValue.setText("")
+        self.ui.faceCountValue.setText("")
+        self.ui.childCountValue.setText("")
 
     def hide_all(self):
         for item in self.ui.viewer.view.items:
@@ -201,14 +200,16 @@ class AnimationViewer(QObject):
         gl_items = self.gl_items.get(selected_node.name)
         if gl_items is not None:
             if has_vertex_animation_frames(selected_node):
-                mesh = gl_items['vertex animation mesh'][0]
-                normals = gl_items['vertex animation normals'][0]
-                self.ui.frame_slider.setMaximum(len(selected_node.vertex_animation.frames)-1)
-                self.state_machine.submitEvent('enable_play')
+                mesh = gl_items["vertex animation mesh"][0]
+                normals = gl_items["vertex animation normals"][0]
+                self.ui.frame_slider.setMaximum(
+                    len(selected_node.vertex_animation.frames) - 1
+                )
+                self.state_machine.submitEvent("enable_play")
             else:
-                mesh = gl_items['mesh']
-                normals = gl_items['normals']
-                self.state_machine.submitEvent('stop')
+                mesh = gl_items["mesh"]
+                normals = gl_items["normals"]
+                self.state_machine.submitEvent("stop")
             mesh.setVisible(True)
             if self.ui.actionToggle_Normals.isChecked():
                 normals.setVisible(True)
@@ -218,9 +219,10 @@ class AnimationViewer(QObject):
         self.ui.faceCountValue.setText(str(len(selected_node.faces)))
         self.ui.childCountValue.setText(str(len(selected_node.children)))
 
-
     def openFile(self):
-        fileName, _ = QFileDialog.getOpenFileName(self.ui, "Open File", "", "XBF Files (*.xbf)")
+        fileName, _ = QFileDialog.getOpenFileName(
+            self.ui, "Open File", "", "XBF Files (*.xbf)"
+        )
         if fileName:
             self.loadFile(fileName)
 
@@ -236,24 +238,26 @@ class AnimationViewer(QObject):
             error_dialog = QMessageBox(self.ui)
             error_dialog.setIcon(QMessageBox.Critical)
             error_dialog.setWindowTitle("File Loading Error")
-            error_dialog.setText('Invalid XBF file')
+            error_dialog.setText("Invalid XBF file")
             error_dialog.exec()
-            qDebug(str(f'Error loading file: {fileName}\n{e}'))
+            qDebug(str(f"Error loading file: {fileName}\n{e}"))
             return
 
-        self.ui.viewer.view.clear() # reset() ?
+        self.ui.viewer.view.clear()  # reset() ?
         self.gl_items = {}
         self.clear_node_details()
         self.ui.animationsList.clear()
         self.ui.segmentsList.clear()
 
-        self.state_machine.submitEvent('stop')
+        self.state_machine.submitEvent("stop")
 
         self.scene_model = SceneModel(scene)
         self.ui.nodeList.setModel(self.scene_model)
-        self.ui.nodeList.selectionModel().selectionChanged.connect(self.on_node_selected)
-        #Expand root nodes
-        #Maybe TODO: only if a limited number
+        self.ui.nodeList.selectionModel().selectionChanged.connect(
+            self.on_node_selected
+        )
+        # Expand root nodes
+        # Maybe TODO: only if a limited number
         for row in range(self.scene_model.rowCount()):
             index = self.scene_model.index(row, 0)
             self.ui.nodeList.setExpanded(index, True)
@@ -271,7 +275,6 @@ class AnimationViewer(QObject):
                             self.load_glItem(item)
                     else:
                         self.load_glItem(value)
-
 
         animations = parse_animations(scene.FXData)
         for animation in animations:
@@ -298,7 +301,9 @@ class AnimationViewer(QObject):
 
     def timer_out(self):
         current_frame = self.ui.frame_slider.value()
-        self.ui.frame_slider.setValue((current_frame+1) % self.ui.frame_slider.maximum())
+        self.ui.frame_slider.setValue(
+            (current_frame + 1) % self.ui.frame_slider.maximum()
+        )
 
     def update_frame(self, current_frame):
         selection_model = self.ui.nodeList.selectionModel()
@@ -314,6 +319,6 @@ class AnimationViewer(QObject):
         if mesh is not None:
             if has_vertex_animation_frames(selected_node):
                 self.hide_all()
-                mesh['vertex animation mesh'][current_frame].setVisible(True)
+                mesh["vertex animation mesh"][current_frame].setVisible(True)
                 if self.ui.actionToggle_Normals.isChecked():
-                    mesh['vertex animation normals'][current_frame].setVisible(True)
+                    mesh["vertex animation normals"][current_frame].setVisible(True)
