@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "xanviewer"
-version = "0.1.0"
+version = "0.0.0"
 description = "A viewer for XBF files as found in the game Emperor: Battle for Dune."
 authors = ["Lunaji <lunacyjay@gmail.com>"]
 license = "GPL-3.0-or-later"
@@ -18,7 +18,11 @@ xanlib = ">=0.1.0"
 [tool.poetry.scripts]
 xanviewer = "xanviewer.main:main"
 
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+metadata = false
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
