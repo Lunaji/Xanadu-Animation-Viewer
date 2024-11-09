@@ -178,12 +178,6 @@ class AnimationViewer(QObject):
                     normals = self.gl_items[key]["vertex animation normals"][i]
                     normals.setVisible(not normals.visible())
 
-    def clear_node_details(self):
-        self.ui.nodeFlagsValue.setText("")
-        self.ui.vertexCountValue.setText("")
-        self.ui.faceCountValue.setText("")
-        self.ui.childCountValue.setText("")
-
     def hide_all(self):
         for item in self.ui.viewer.view.items:
             item.setVisible(False)
@@ -214,10 +208,6 @@ class AnimationViewer(QObject):
             if self.ui.actionToggle_Normals.isChecked():
                 normals.setVisible(True)
 
-        self.ui.vertexCountValue.setText(str(len(selected_node.vertices)))
-        self.ui.faceCountValue.setText(str(len(selected_node.faces)))
-        self.ui.childCountValue.setText(str(len(selected_node.children)))
-
     def openFile(self):
         fileName, _ = QFileDialog.getOpenFileName(
             self.ui, "Open File", "", "XBF Files (*.xbf)"
@@ -244,7 +234,6 @@ class AnimationViewer(QObject):
 
         self.ui.viewer.view.clear()  # reset() ?
         self.gl_items = {}
-        self.clear_node_details()
         self.ui.animationsList.clear()
         self.ui.segmentsList.clear()
 
@@ -261,7 +250,9 @@ class AnimationViewer(QObject):
             index = self.scene_model.index(row, 0)
             self.ui.nodeList.setExpanded(index, True)
         for i in range(1, 7):
-            self.ui.nodeList.header().setSectionResizeMode(i, QHeaderView.ResizeToContents)
+            self.ui.nodeList.header().setSectionResizeMode(
+                i, QHeaderView.ResizeToContents
+            )
 
         for node in scene:
             if node.vertices:

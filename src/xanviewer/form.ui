@@ -149,64 +149,6 @@
           </attribute>
          </widget>
         </item>
-        <item>
-         <widget class="QGroupBox" name="nodeDetails">
-          <property name="title">
-           <string>Node Details</string>
-          </property>
-          <layout class="QFormLayout" name="formLayout_2">
-           <item row="0" column="1">
-            <widget class="QLabel" name="nodeFlagsValue">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QLabel" name="vertexCountValue">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="vertexCountLabel">
-             <property name="text">
-              <string>Vertex #:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="faceCountLabel">
-             <property name="text">
-              <string>Face #</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QLabel" name="faceCountValue">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="childCountLabel">
-             <property name="text">
-              <string>Child #</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QLabel" name="childCountValue">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="animationsTab">
