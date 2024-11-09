@@ -155,13 +155,6 @@
            <string>Node Details</string>
           </property>
           <layout class="QFormLayout" name="formLayout_2">
-           <item row="0" column="0">
-            <widget class="QLabel" name="nodeFlagsLabel">
-             <property name="text">
-              <string>Flags:</string>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="1">
             <widget class="QLabel" name="nodeFlagsValue">
              <property name="text">

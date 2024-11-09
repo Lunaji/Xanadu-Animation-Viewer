@@ -214,7 +214,6 @@ class AnimationViewer(QObject):
             if self.ui.actionToggle_Normals.isChecked():
                 normals.setVisible(True)
 
-        self.ui.nodeFlagsValue.setText(str(selected_node.flags))
         self.ui.vertexCountValue.setText(str(len(selected_node.vertices)))
         self.ui.faceCountValue.setText(str(len(selected_node.faces)))
         self.ui.childCountValue.setText(str(len(selected_node.children)))
@@ -282,7 +281,7 @@ class AnimationViewer(QObject):
             animation_item.setData(Qt.UserRole, animation)
             self.ui.animationsList.addItem(animation_item)
 
-        self.ui.fileValue.setText(QFileInfo(scene.file).fileName())
+        self.ui.fileValue.setText(QFileInfo(fileName).fileName())
         self.ui.versionValue.setText(str(scene.version))
 
         if fileName in self.recent_files:
