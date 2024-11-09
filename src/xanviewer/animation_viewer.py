@@ -3,6 +3,7 @@ from PySide6.QtCore import (
     QSettings,
     QFileInfo,
     QTimer,
+    QPoint,
     SLOT,
     Slot,
     qDebug,
@@ -10,6 +11,8 @@ from PySide6.QtCore import (
 from PySide6.QtGui import QAction
 import pyqtgraph.opengl as gl
 from PySide6.QtWidgets import (
+    QApplication,
+    QMenu,
     QVBoxLayout,
     QFileDialog,
     QMessageBox,
@@ -126,6 +129,26 @@ class AnimationViewer(QObject):
         self.ui.play_button.toggled.connect(self.on_play_button_toggled)
 
         self.ui.animationsList.currentItemChanged.connect(self.on_animation_selected)
+
+        self.ui.nodeList.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui.nodeList.customContextMenuRequested.connect(self.show_context_menu)
+        self.ui.actionCopy.triggered.connect(self.copy_to_clipboard)
+
+    @Slot(QPoint)
+    def show_context_menu(self, position):
+        index = self.ui.nodeList.indexAt(position)
+        if not index.isValid():
+            return
+
+        context_menu = QMenu(self.ui.nodeList)
+        context_menu.addAction(self.ui.actionCopy)
+        context_menu.exec(self.ui.nodeList.viewport().mapToGlobal(position))
+
+    @Slot()
+    def copy_to_clipboard(self):
+        selected_index = self.ui.nodeList.currentIndex()
+        selected_node = selected_index.internalPointer()
+        QApplication.clipboard().setText(selected_node.name)
 
     @Slot(bool)
     def on_play_button_toggled(self, checked):
