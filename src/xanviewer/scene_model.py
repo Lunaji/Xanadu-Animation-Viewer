@@ -1,5 +1,6 @@
 from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt
 
+
 class SceneModel(QAbstractItemModel):
 
     def __init__(self, scene, parent=None):
@@ -19,7 +20,7 @@ class SceneModel(QAbstractItemModel):
             return QModelIndex()
         child = index.internalPointer()
         parent_node = child.parent
-        if parent_node is None: #assert can't ?
+        if parent_node is None:  # assert can't ?
             return QModelIndex()
 
         grandparent_node = parent_node.parent
@@ -27,8 +28,8 @@ class SceneModel(QAbstractItemModel):
             nodes_row = self.scene.nodes
         else:
             nodes_row = grandparent_node.children
-        row = next((i for i,node in enumerate(nodes_row) if node==parent_node), None)
-        if row is None: # assert can't ?
+        row = next((i for i, node in enumerate(nodes_row) if node == parent_node), None)
+        if row is None:  # assert can't ?
             return QModelIndex()
         return self.createIndex(row, 0, parent_node)
 
