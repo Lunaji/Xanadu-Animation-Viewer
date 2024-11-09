@@ -71,7 +71,7 @@ class SceneModel(QAbstractItemModel):
     def headerData(self, section, orientation, role=Qt.DisplayRole):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             if section == 0:
-                return "Node"
+                return "Object"
             elif section == 1:
                 return "VC"
             elif section == 2:

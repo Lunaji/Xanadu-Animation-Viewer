@@ -102,7 +102,7 @@
       </property>
       <widget class="QWidget" name="meshesTab">
        <attribute name="title">
-        <string>Meshes</string>
+        <string>Objects</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
