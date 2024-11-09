@@ -1,4 +1,5 @@
 from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt
+from PySide6.QtWidgets import QApplication, QStyle
 
 
 class SceneModel(QAbstractItemModel):
@@ -39,7 +40,7 @@ class SceneModel(QAbstractItemModel):
         return len(index.internalPointer().children)
 
     def columnCount(self, index=QModelIndex()):
-        return 3
+        return 7
 
     def data(self, index, role=Qt.DisplayRole):
         if not index.isValid():
@@ -51,11 +52,19 @@ class SceneModel(QAbstractItemModel):
         if role == Qt.DisplayRole:
             if column == 0:
                 return node.name
+            elif column == 1:
+                return len(node.vertices)
+            elif column == 2:
+                return len(node.faces)
 
         if role == Qt.CheckStateRole:
-            if column == 1:
+            if column == 3:
+                return Qt.Checked if node.rgb is not None else Qt.Unchecked
+            elif column == 4:
+                return Qt.Checked if node.smoothing_groups is not None else Qt.Unchecked
+            elif column == 5:
                 return Qt.Checked if node.vertex_animation is not None else Qt.Unchecked
-            elif column == 2:
+            elif column == 6:
                 return Qt.Checked if node.key_animation is not None else Qt.Unchecked
 
         return None
@@ -63,9 +72,36 @@ class SceneModel(QAbstractItemModel):
     def headerData(self, section, orientation, role=Qt.DisplayRole):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             if section == 0:
-                return "Node Name"
-            elif section == 1:
-                return "V"
+                return "Object"
+
+        if role == Qt.DecorationRole and orientation == Qt.Horizontal:
+            if section == 1:
+                return QApplication.style().standardIcon(
+                    QStyle.SP_FileDialogContentsView
+                )
             elif section == 2:
-                return "K"
+                return QApplication.style().standardIcon(QStyle.SP_TitleBarShadeButton)
+            elif section == 3:
+                return QApplication.style().standardIcon(QStyle.SP_BrowserReload)
+            elif section == 4:
+                return QApplication.style().standardIcon(QStyle.SP_BrowserStop)
+            elif section == 5:
+                return QApplication.style().standardIcon(QStyle.SP_ArrowRight)
+            elif section == 6:
+                return QApplication.style().standardIcon(QStyle.SP_ArrowDown)
+
+        if role == Qt.ToolTipRole and orientation == Qt.Horizontal:
+            if section == 1:
+                return "Vertex Count"
+            elif section == 2:
+                return "Face Count"
+            elif section == 3:
+                return "Prelight"
+            elif section == 4:
+                return "Smoothing Groups"
+            elif section == 5:
+                return "Vertex Animation"
+            elif section == 6:
+                return "Keyframe Animation"
+
         return None

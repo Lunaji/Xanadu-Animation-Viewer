@@ -3,6 +3,7 @@ from PySide6.QtCore import (
     QSettings,
     QFileInfo,
     QTimer,
+    QPoint,
     SLOT,
     Slot,
     qDebug,
@@ -10,6 +11,8 @@ from PySide6.QtCore import (
 from PySide6.QtGui import QAction
 import pyqtgraph.opengl as gl
 from PySide6.QtWidgets import (
+    QApplication,
+    QMenu,
     QVBoxLayout,
     QFileDialog,
     QMessageBox,
@@ -127,6 +130,26 @@ class AnimationViewer(QObject):
 
         self.ui.animationsList.currentItemChanged.connect(self.on_animation_selected)
 
+        self.ui.nodeList.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui.nodeList.customContextMenuRequested.connect(self.show_context_menu)
+        self.ui.actionCopy.triggered.connect(self.copy_to_clipboard)
+
+    @Slot(QPoint)
+    def show_context_menu(self, position):
+        index = self.ui.nodeList.indexAt(position)
+        if not index.isValid():
+            return
+
+        context_menu = QMenu(self.ui.nodeList)
+        context_menu.addAction(self.ui.actionCopy)
+        context_menu.exec(self.ui.nodeList.viewport().mapToGlobal(position))
+
+    @Slot()
+    def copy_to_clipboard(self):
+        selected_index = self.ui.nodeList.currentIndex()
+        selected_node = selected_index.internalPointer()
+        QApplication.clipboard().setText(selected_node.name)
+
     @Slot(bool)
     def on_play_button_toggled(self, checked):
         if checked:
@@ -178,12 +201,6 @@ class AnimationViewer(QObject):
                     normals = self.gl_items[key]["vertex animation normals"][i]
                     normals.setVisible(not normals.visible())
 
-    def clear_node_details(self):
-        self.ui.nodeFlagsValue.setText("")
-        self.ui.vertexCountValue.setText("")
-        self.ui.faceCountValue.setText("")
-        self.ui.childCountValue.setText("")
-
     def hide_all(self):
         for item in self.ui.viewer.view.items:
             item.setVisible(False)
@@ -214,10 +231,6 @@ class AnimationViewer(QObject):
             if self.ui.actionToggle_Normals.isChecked():
                 normals.setVisible(True)
 
-        self.ui.vertexCountValue.setText(str(len(selected_node.vertices)))
-        self.ui.faceCountValue.setText(str(len(selected_node.faces)))
-        self.ui.childCountValue.setText(str(len(selected_node.children)))
-
     def openFile(self):
         fileName, _ = QFileDialog.getOpenFileName(
             self.ui, "Open File", "", "XBF Files (*.xbf)"
@@ -244,7 +257,6 @@ class AnimationViewer(QObject):
 
         self.ui.viewer.view.clear()  # reset() ?
         self.gl_items = {}
-        self.clear_node_details()
         self.ui.animationsList.clear()
         self.ui.segmentsList.clear()
 
@@ -260,9 +272,10 @@ class AnimationViewer(QObject):
         for row in range(self.scene_model.rowCount()):
             index = self.scene_model.index(row, 0)
             self.ui.nodeList.setExpanded(index, True)
-        self.ui.nodeList.header().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.ui.nodeList.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        self.ui.nodeList.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        for i in range(1, 7):
+            self.ui.nodeList.header().setSectionResizeMode(
+                i, QHeaderView.ResizeToContents
+            )
 
         for node in scene:
             if node.vertices:
