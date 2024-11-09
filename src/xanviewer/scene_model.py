@@ -1,4 +1,5 @@
 from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt
+from PySide6.QtWidgets import QApplication, QStyle
 
 
 class SceneModel(QAbstractItemModel):
@@ -72,16 +73,35 @@ class SceneModel(QAbstractItemModel):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             if section == 0:
                 return "Object"
-            elif section == 1:
-                return "VC"
+
+        if role == Qt.DecorationRole and orientation == Qt.Horizontal:
+            if section == 1:
+                return QApplication.style().standardIcon(
+                    QStyle.SP_FileDialogContentsView
+                )
             elif section == 2:
-                return "FC"
+                return QApplication.style().standardIcon(QStyle.SP_TitleBarShadeButton)
             elif section == 3:
-                return "C"
+                return QApplication.style().standardIcon(QStyle.SP_BrowserReload)
             elif section == 4:
-                return "SG"
+                return QApplication.style().standardIcon(QStyle.SP_BrowserStop)
             elif section == 5:
-                return "V"
+                return QApplication.style().standardIcon(QStyle.SP_ArrowRight)
             elif section == 6:
-                return "K"
+                return QApplication.style().standardIcon(QStyle.SP_ArrowDown)
+
+        if role == Qt.ToolTipRole and orientation == Qt.Horizontal:
+            if section == 1:
+                return "Vertex Count"
+            elif section == 2:
+                return "Face Count"
+            elif section == 3:
+                return "Prelight"
+            elif section == 4:
+                return "Smoothing Groups"
+            elif section == 5:
+                return "Vertex Animation"
+            elif section == 6:
+                return "Keyframe Animation"
+
         return None
